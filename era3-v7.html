@@ -1,0 +1,1858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Era 3: Hardcoded Silos - The Token Graveyard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
+
+    body {
+      background: #05060b;
+      color: white;
+      font-family: 'JetBrains Mono', monospace;
+      margin: 0;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+
+    #presentation-wrapper {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      padding: 1rem;
+      box-sizing: border-box;
+      transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #main-workspace {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      align-items: center;
+      flex: 1;
+      min-height: 0;
+      transition: filter 0.6s ease, opacity 0.6s ease;
+    }
+
+    .blur-active #wires-layer,
+    .blur-active header,
+    .blur-active .floating-label,
+    .blur-active #footer-caption,
+    .blur-active #main-workspace > :not(.prompt-column) {
+      filter: blur(15px) brightness(0.2);
+      pointer-events: none;
+    }
+
+    .blur-active .prompt-column > :not(.prompt-zone) {
+      filter: blur(15px) brightness(0.2);
+      pointer-events: none;
+    }
+
+    .blur-active .prompt-zone > :not(.context-container.zoomed):not(.api-error-focus.visible):not(.metadata-error-focus.visible):not(.loop-error-focus.visible) {
+      filter: blur(15px) brightness(0.2);
+      pointer-events: none;
+    }
+
+    .brain-stack {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.65rem;
+      z-index: 30;
+    }
+
+    .brain-label-top {
+      font-weight: 900;
+      font-size: 12px;
+      color: #f43f5e;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      text-shadow: 0 0 18px rgba(244, 63, 94, 0.35);
+      opacity: 0.9;
+    }
+
+    .brain-core {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at center, rgba(157, 0, 255, 0.30) 0%, rgba(157, 0, 255, 0.12) 35%, transparent 70%),
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.08) 0%, transparent 30%);
+      border: 2px solid rgba(157, 0, 255, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+      z-index: 20;
+      box-shadow:
+        0 0 60px rgba(157, 0, 255, 0.25),
+        inset 0 0 30px rgba(157, 0, 255, 0.12);
+      animation: brain-breathe 4s ease-in-out infinite;
+    }
+
+    .brain-halo {
+      position: absolute;
+      inset: -18px;
+      border-radius: 9999px;
+      border: 1px solid rgba(244, 63, 94, 0.18);
+      box-shadow: 0 0 30px rgba(244, 63, 94, 0.1);
+      animation: halo-pulse 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .brain-halo::after {
+      content: "";
+      position: absolute;
+      inset: -14px;
+      border-radius: 9999px;
+      border: 1px dashed rgba(157, 0, 255, 0.14);
+      animation: halo-pulse-2 5s linear infinite;
+    }
+
+    @keyframes brain-breathe {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 60px rgba(157, 0, 255, 0.25), inset 0 0 30px rgba(157, 0, 255, 0.12);
+      }
+      50% {
+        transform: scale(1.03);
+        box-shadow: 0 0 95px rgba(157, 0, 255, 0.38), inset 0 0 40px rgba(157, 0, 255, 0.20);
+      }
+    }
+
+    @keyframes halo-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.45; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+
+    @keyframes halo-pulse-2 {
+      from { transform: rotate(0deg); opacity: 0.35; }
+      to { transform: rotate(360deg); opacity: 0.6; }
+    }
+
+    .neural-node {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #9d00ff;
+      border-radius: 50%;
+      filter: blur(1px);
+      animation: neural-pulse 4s infinite ease-in-out;
+    }
+
+    @keyframes neural-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.2; }
+      50% { transform: scale(3); opacity: 0.75; box-shadow: 0 0 14px #9d00ff; }
+    }
+
+    .wrapper-hub {
+      width: 260px;
+      min-height: 320px;
+      border: 4px solid #f59e0b;
+      background: rgba(245, 158, 11, 0.09);
+      border-radius: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      position: relative;
+      z-index: 50;
+      box-shadow: 0 0 60px rgba(245, 158, 11, 0.18);
+      transition: all 0.45s ease;
+      padding: 16px;
+      box-sizing: border-box;
+      gap: 12px;
+    }
+
+    .bridge-title {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 900;
+      color: #f59e0b;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .tool-call-preview {
+      width: 100%;
+      min-height: 82px;
+      border-radius: 14px;
+      border: 1px solid rgba(0, 242, 255, 0.35);
+      background: rgba(0, 242, 255, 0.08);
+      padding: 12px;
+      box-sizing: border-box;
+      font-size: 9px;
+      line-height: 1.45;
+      color: #a5f3fc;
+      box-shadow: inset 0 0 22px rgba(0, 242, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tool-call-preview .preview-label {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      font-size: 8px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #22d3ee;
+      opacity: 0.8;
+    }
+
+    .tool-call-preview.empty {
+      opacity: 0.45;
+    }
+
+    #hub-log {
+      font-size: 8px;
+      color: #cbd5e1;
+      text-align: left;
+      padding: 12px;
+      line-height: 1.6;
+      background: rgba(0, 0, 0, 0.58);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 0 24px rgba(255, 255, 255, 0.03);
+      overflow: hidden;
+      width: 100%;
+      min-height: 165px;
+      box-sizing: border-box;
+    }
+
+    .context-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .system-prompt-block,
+    .history-block {
+      background: rgba(10, 5, 5, 0.95);
+      border: 2px solid #f43f5e;
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 8px;
+      color: #f43f5e;
+      max-height: 120px;
+      overflow: hidden;
+      position: relative;
+      line-height: 1.3;
+      width: 100%;
+      box-sizing: border-box;
+      box-shadow: 0 0 30px rgba(244, 63, 94, 0.2);
+      z-index: 20;
+    }
+
+    .history-block {
+      border-color: #9d00ff;
+      color: #d8b4fe;
+      overflow-y: auto;
+      min-height: 165px;
+      max-height: 165px;
+    }
+
+    .context-container.zoomed {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 1180px;
+      max-height: 86vh;
+      z-index: 5000;
+      flex-direction: row;
+      gap: 30px;
+      pointer-events: auto;
+      filter: none !important;
+      opacity: 1 !important;
+    }
+
+    .context-container.zoomed .system-prompt-block {
+      flex: 1.2;
+      max-height: 78vh;
+      padding: 40px;
+      font-size: 14px;
+      box-shadow: 0 0 400px rgba(244, 63, 94, 0.2);
+      overflow-y: auto;
+    }
+
+    .context-container.zoomed .history-block {
+      flex: 1.1;
+      max-height: 78vh;
+      padding: 30px;
+      font-size: 12px;
+      background: rgba(10, 5, 5, 0.8);
+      overflow-y: auto;
+    }
+
+    .context-container.zoomed span {
+      font-size: 14px !important;
+      line-height: 1.6;
+    }
+
+    .block-label {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-weight: 900;
+      font-size: 8px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    #user-console, #ai-console {
+      overflow-y: auto !important;
+      scroll-behavior: smooth;
+      padding-bottom: 80px;
+      height: 100%;
+    }
+
+    .chat-bubble {
+      max-width: 95%;
+      padding: 1rem;
+      border-radius: 1rem;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      opacity: 0;
+      display: none;
+      transform: translateY(15px);
+      transition: all 0.4s;
+      line-height: 1.4;
+    }
+
+    .chat-bubble.visible {
+      opacity: 1;
+      display: block;
+      transform: translateY(0);
+    }
+
+    .user-msg {
+      background: rgba(0, 242, 255, 0.1);
+      border-left: 5px solid #00f2ff;
+      color: white;
+    }
+
+    .ai-msg {
+      background: rgba(157, 0, 255, 0.1);
+      border-right: 5px solid #9d00ff;
+      text-align: right;
+      width: 95%;
+      color: #d8b4fe;
+    }
+
+    .highlight-tax {
+      border: 2px solid #00f2ff;
+      background: rgba(0, 242, 255, 0.1);
+      padding: 6px 12px;
+      border-radius: 8px;
+      color: #00f2ff;
+      font-weight: 900;
+      display: block;
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+
+    .app-tile {
+      width: 120px;
+      height: 55px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.03);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      transition: all 0.3s;
+      opacity: 0.15;
+      position: relative;
+      z-index: 10;
+    }
+
+    .app-tile.active {
+      opacity: 1;
+      border-color: #00f2ff;
+      background: rgba(0, 242, 255, 0.15);
+      transform: scale(1.08);
+      box-shadow: 0 0 24px rgba(0, 242, 255, 0.25);
+      animation: app-pulse 1.2s infinite alternate;
+    }
+
+    @keyframes app-pulse {
+      from {
+        border-color: #00f2ff;
+        box-shadow: 0 0 14px rgba(0, 242, 255, 0.18);
+      }
+      to {
+        border-color: #ffffff;
+        box-shadow: 0 0 28px rgba(0, 242, 255, 0.35);
+      }
+    }
+
+    .wiring-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: visible;
+    }
+
+    .wire {
+      fill: none;
+      stroke: #9d00ff;
+      stroke-width: 2.5;
+      opacity: 0.08;
+      stroke-dasharray: 7 10;
+      transition: all 0.5s ease;
+    }
+
+    .wire.active {
+      opacity: 0.9;
+      stroke: #00f2ff;
+      stroke-width: 3.8;
+      stroke-dasharray: none;
+      filter: drop-shadow(0 0 12px #00f2ff);
+    }
+
+    .prompt-arc {
+      stroke: #f43f5e;
+      stroke-width: 3.5;
+      opacity: 0.16;
+      stroke-dasharray: 8 10;
+      transition: all 0.8s ease;
+    }
+
+    .prompt-arc.active {
+      opacity: 1;
+      stroke: #f43f5e;
+      stroke-width: 4.5;
+      stroke-dasharray: none;
+      filter: drop-shadow(0 0 16px rgba(244, 63, 94, 0.9));
+    }
+
+    .bridge-arc {
+      stroke: #f59e0b;
+      stroke-width: 3.5;
+      opacity: 0.16;
+      stroke-dasharray: 8 10;
+      transition: all 0.8s ease;
+    }
+
+    .bridge-arc.active {
+      opacity: 1;
+      stroke: #f59e0b;
+      stroke-width: 4.5;
+      stroke-dasharray: none;
+      filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.9));
+    }
+
+    .wire-glow {
+      fill: none;
+      stroke-width: 12;
+      opacity: 0;
+      filter: blur(10px);
+      transition: opacity 0.35s ease;
+    }
+
+    .wire-glow.active { opacity: 0.4; }
+
+    #glow-llm-history { stroke: rgba(244, 63, 94, 0.85); }
+    #glow-llm-decision { stroke: rgba(245, 158, 11, 0.85); }
+    #glow-aws, #glow-gitlab, #glow-browser, #glow-email { stroke: rgba(0, 242, 255, 0.65); }
+
+    .wire-flow {
+      fill: none;
+      stroke-width: 5;
+      stroke-linecap: round;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .wire-flow.active { opacity: 1; }
+
+    .wire-flow-dispatch {
+      stroke: #00f2ff;
+      stroke-dasharray: 12 24;
+      animation: flow-forward 1s linear infinite;
+      filter: drop-shadow(0 0 10px #00f2ff);
+    }
+
+    .wire-flow-result {
+      stroke: #9d00ff;
+      stroke-dasharray: 12 24;
+      animation: flow-backward 1s linear infinite;
+      filter: drop-shadow(0 0 10px #9d00ff);
+    }
+
+    .wire-flow-history {
+      stroke: #f43f5e;
+      stroke-dasharray: 14 20;
+      animation: flow-forward 1.05s linear infinite;
+      filter: drop-shadow(0 0 12px rgba(244, 63, 94, 0.9));
+    }
+
+    .wire-flow-decision {
+      stroke: #f59e0b;
+      stroke-dasharray: 14 20;
+      animation: flow-forward 1.05s linear infinite;
+      filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.9));
+    }
+
+    @keyframes flow-forward {
+      from { stroke-dashoffset: 120; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes flow-backward {
+      from { stroke-dashoffset: 0; }
+      to { stroke-dashoffset: 120; }
+    }
+
+    .pulse-particle {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 9999px;
+      visibility: hidden;
+      z-index: 120;
+      offset-rotate: auto;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .pulse-particle::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 9999px;
+    }
+
+    .pulse-particle.cyan::before {
+      background: #00f2ff;
+      box-shadow: 0 0 18px #00f2ff, 0 0 35px rgba(0, 242, 255, 0.5);
+    }
+
+    .pulse-particle.violet::before {
+      background: #9d00ff;
+      box-shadow: 0 0 18px #9d00ff, 0 0 35px rgba(157, 0, 255, 0.5);
+    }
+
+    .pulse-particle.red::before {
+      background: #f43f5e;
+      box-shadow: 0 0 18px #f43f5e, 0 0 35px rgba(244, 63, 94, 0.55);
+    }
+
+    .pulse-particle.orange::before {
+      background: #f59e0b;
+      box-shadow: 0 0 18px #f59e0b, 0 0 35px rgba(245, 158, 11, 0.55);
+    }
+
+    .pulse-particle.animate {
+      visibility: visible;
+      animation: particle-travel 1.15s linear infinite;
+    }
+
+    @keyframes particle-travel {
+      0% { offset-distance: 0%; opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+      10% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      85% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { offset-distance: 100%; opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+    }
+
+    .floating-label {
+      position: absolute;
+      background: #f43f5e;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 8px;
+      font-weight: 900;
+      text-transform: uppercase;
+      z-index: 100;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+
+    .context-fence {
+      position: absolute;
+      inset: -20px;
+      border: 4px dashed #f43f5e;
+      border-radius: 25px;
+      background: rgba(244, 63, 94, 0.05);
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0;
+      transition: all 0.8s;
+    }
+
+    .context-fence.active { opacity: 0.8; }
+
+    #json-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      width: 650px;
+      background: rgba(10, 15, 25, 0.99);
+      border: 2px solid #00f2ff;
+      padding: 40px;
+      border-radius: 32px;
+      z-index: 6000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.4s;
+      box-shadow: 0 0 150px rgba(0, 242, 255, 0.3);
+      backdrop-filter: blur(20px);
+    }
+
+    #json-modal.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .api-error-focus,
+    .metadata-error-focus,
+    .loop-error-focus {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.82);
+      width: 900px;
+      max-width: 92vw;
+      border-radius: 28px;
+      padding: 30px;
+      z-index: 6500;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.45s ease;
+      backdrop-filter: blur(18px);
+    }
+
+    .api-error-focus,
+    .metadata-error-focus {
+      background: rgba(17, 5, 8, 0.98);
+      border: 2px solid #ef4444;
+      box-shadow: 0 0 160px rgba(239, 68, 68, 0.32);
+    }
+
+    .loop-error-focus {
+      background: rgba(18, 14, 4, 0.98);
+      border: 2px solid #f59e0b;
+      box-shadow: 0 0 160px rgba(245, 158, 11, 0.24);
+    }
+
+    .api-error-focus.visible,
+    .metadata-error-focus.visible,
+    .loop-error-focus.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .error-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .error-pane {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    #conclusion-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      width: 92%;
+      max-width: 1040px;
+      background: rgba(10, 15, 25, 0.99);
+      border: 3px solid #9d00ff;
+      padding: 2.5rem;
+      border-radius: 30px;
+      text-align: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.8s;
+      z-index: 7000;
+      box-shadow: 0 0 200px rgba(157, 0, 255, 0.5);
+      backdrop-filter: blur(25px);
+    }
+
+    #conclusion-box.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .nm-chaos-mesh {
+      position: absolute;
+      inset: 0;
+      background: rgba(5, 6, 11, 0.985);
+      z-index: 8000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1s;
+    }
+
+    .nm-chaos-mesh.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .arc-text {
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+
+    .arc-text.visible { opacity: 1; }
+
+    #history-arc-label { fill: #f43f5e; }
+    #decision-arc-label { fill: #f59e0b; }
+
+    .arc-side-label {
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.35s;
+    }
+
+    .arc-side-label.visible { opacity: 0.95; }
+    .arc-side-label.cyan { fill: #00f2ff; }
+
+    .nm-stage {
+      width: 100%;
+      max-width: 1320px;
+      height: 86vh;
+      position: relative;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 18px;
+      padding: 32px 24px 22px;
+      box-sizing: border-box;
+    }
+
+    .nm-topline {
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 5px;
+      font-weight: 900;
+      color: #94a3b8;
+      font-size: 12px;
+    }
+
+    .nm-title-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      z-index: 3;
+    }
+
+    .nm-title-wrap h2 {
+      margin: 0;
+      font-size: 56px;
+      line-height: 1;
+      font-weight: 900;
+      color: #8b5cf6;
+      text-transform: uppercase;
+      font-style: italic;
+      letter-spacing: -2px;
+      text-align: center;
+    }
+
+    .nm-title-wrap p {
+      margin: 0;
+      color: #cbd5e1;
+      font-size: 16px;
+      max-width: 860px;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .fn-call-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .fn-card {
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      padding: 18px;
+      box-sizing: border-box;
+      min-height: 260px;
+    }
+
+    .fn-card .eyebrow {
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .fn-card pre {
+      margin: 0;
+      white-space: pre-wrap;
+      font-size: 12px;
+      line-height: 1.55;
+      color: #e2e8f0;
+    }
+
+    .fn-note {
+      text-align: center;
+      color: #f59e0b;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-size: 13px;
+    }
+
+    .nm-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: 240px 1fr 240px;
+      gap: 22px;
+      min-height: 0;
+      align-items: stretch;
+    }
+
+    .nm-column-box {
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 2;
+    }
+
+    .nm-column-title {
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      opacity: 0.8;
+      text-align: center;
+    }
+
+    .nm-column-title.model { color: #d8b4fe; }
+    .nm-column-title.tool { color: #67e8f9; }
+
+    .nm-column {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .nm-node {
+      width: 100%;
+      min-height: 58px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px 12px;
+      box-sizing: border-box;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 0 28px rgba(255,255,255,0.08);
+    }
+
+    .nm-model {
+      background: rgba(157, 0, 255, 0.12);
+      border: 1px solid rgba(157, 0, 255, 0.55);
+      color: #d8b4fe;
+    }
+
+    .nm-tool {
+      background: rgba(0, 242, 255, 0.12);
+      border: 1px solid rgba(0, 242, 255, 0.55);
+      color: #67e8f9;
+    }
+
+    .nm-center {
+      position: relative;
+      border-radius: 24px;
+      border: 1px solid rgba(245, 158, 11, 0.18);
+      background:
+        radial-gradient(circle at center, rgba(245, 158, 11, 0.08), transparent 65%),
+        rgba(255,255,255,0.02);
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    #nm-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .nm-overlay-copy {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 30px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 3;
+    }
+
+    .mess-banner {
+      border-radius: 16px;
+      background: rgba(244, 63, 94, 0.08);
+      border: 1px solid rgba(244, 63, 94, 0.22);
+      padding: 14px 18px;
+      color: #fecdd3;
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .nm-footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nm-footer-card {
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.035);
+      padding: 18px 24px;
+      max-width: 920px;
+    }
+
+    .nm-footer-card p {
+      margin: 0;
+      color: #e2e8f0;
+      line-height: 1.55;
+      font-size: 22px;
+      font-style: italic;
+      font-weight: 700;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="presentation-wrapper">
+    <svg class="wiring-svg" id="wires-layer">
+      <path id="path-aws" class="wire" d="" />
+      <path id="path-gitlab" class="wire" d="" />
+      <path id="path-browser" class="wire" d="" />
+      <path id="path-email" class="wire" d="" />
+
+      <path id="path-llm-history" class="wire prompt-arc" d="" />
+      <path id="path-llm-decision" class="wire bridge-arc" d="" />
+
+      <path id="glow-aws" class="wire-glow" d="" />
+      <path id="glow-gitlab" class="wire-glow" d="" />
+      <path id="glow-browser" class="wire-glow" d="" />
+      <path id="glow-email" class="wire-glow" d="" />
+      <path id="glow-llm-history" class="wire-glow" d="" />
+      <path id="glow-llm-decision" class="wire-glow" d="" />
+
+      <path id="flow-aws-dispatch" class="wire-flow wire-flow-dispatch" d="" />
+      <path id="flow-aws-result" class="wire-flow wire-flow-result" d="" />
+
+      <path id="flow-gitlab-dispatch" class="wire-flow wire-flow-dispatch" d="" />
+      <path id="flow-gitlab-result" class="wire-flow wire-flow-result" d="" />
+
+      <path id="flow-browser-dispatch" class="wire-flow wire-flow-dispatch" d="" />
+      <path id="flow-browser-result" class="wire-flow wire-flow-result" d="" />
+
+      <path id="flow-email-dispatch" class="wire-flow wire-flow-dispatch" d="" />
+      <path id="flow-email-result" class="wire-flow wire-flow-result" d="" />
+
+      <path id="flow-llm-history" class="wire-flow wire-flow-history" d="" />
+      <path id="flow-llm-decision" class="wire-flow wire-flow-decision" d="" />
+
+      <text id="history-arc-label" class="arc-text" dy="-18">
+        <textPath href="#path-llm-history" startOffset="50%" text-anchor="middle">ROLLING HISTORY</textPath>
+      </text>
+
+      <text id="decision-arc-label" class="arc-text" dy="18">
+        <textPath href="#path-llm-decision" startOffset="50%" text-anchor="middle">DECISION / TOOL CALL</textPath>
+      </text>
+
+      <text id="aws-label" class="arc-side-label cyan">
+        <textPath href="#path-aws" startOffset="36%" text-anchor="middle">DISPATCH / RESULT</textPath>
+      </text>
+      <text id="gitlab-label" class="arc-side-label cyan">
+        <textPath href="#path-gitlab" startOffset="36%" text-anchor="middle">DISPATCH / RESULT</textPath>
+      </text>
+      <text id="browser-label" class="arc-side-label cyan">
+        <textPath href="#path-browser" startOffset="36%" text-anchor="middle">DISPATCH / RESULT</textPath>
+      </text>
+      <text id="email-label" class="arc-side-label cyan">
+        <textPath href="#path-email" startOffset="36%" text-anchor="middle">DISPATCH / RESULT</textPath>
+      </text>
+    </svg>
+
+    <div id="particle-llm-history" class="pulse-particle red"></div>
+    <div id="particle-llm-decision" class="pulse-particle orange"></div>
+
+    <div id="particle-aws-dispatch" class="pulse-particle cyan"></div>
+    <div id="particle-gitlab-dispatch" class="pulse-particle cyan"></div>
+    <div id="particle-browser-dispatch" class="pulse-particle cyan"></div>
+    <div id="particle-email-dispatch" class="pulse-particle cyan"></div>
+
+    <div id="particle-aws-result" class="pulse-particle violet"></div>
+    <div id="particle-gitlab-result" class="pulse-particle violet"></div>
+    <div id="particle-browser-result" class="pulse-particle violet"></div>
+    <div id="particle-email-result" class="pulse-particle violet"></div>
+
+    <div id="label-suitcase" class="floating-label" style="top: 20%; right: 5%;">THE STUFFED SUITCASE</div>
+    <div id="label-bridge" class="floating-label" style="top: 20%; left: 35%; background:#f59e0b;">HARDCODED TRANSLATION</div>
+
+    <div id="json-modal">
+      <div class="text-cyan-400 font-bold uppercase tracking-[0.4em] mb-4 text-xs">Architectural Choice</div>
+      <h2 class="text-3xl font-black mb-8 italic text-white underline underline-offset-8 decoration-cyan-500/30">Why JSON despite the tax?</h2>
+      <div class="space-y-6 text-sm text-slate-300">
+        <p><b>Hard contract</b>: JSON gives structure.</p>
+        <p><b>But</b>: the bridge still has to translate everything manually.</p>
+      </div>
+      <button onclick="nextStep()" class="mt-8 w-full py-4 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 font-black rounded-xl hover:bg-cyan-500/40 transition-all uppercase tracking-widest text-[10px]">
+        Close and Continue
+      </button>
+    </div>
+
+    <div id="metadata-error-focus" class="metadata-error-focus">
+        <div class="text-red-400 font-black uppercase tracking-[0.45em] text-xs mb-3">Discovery Failure</div>
+        <div class="text-white text-3xl font-black mb-8 italic">Bravo is unreachable.</div>
+
+        <div class="error-grid-2">
+            <div class="error-pane">
+            <div class="text-red-300 font-black uppercase tracking-[0.2em] text-xs mb-4">Missing hardcoded tool</div>
+            <div class="text-slate-200 text-sm leading-7">
+                <b>get_object_head</b><br>
+                is not available in the bridge.
+            </div>
+            </div>
+            <div class="error-pane">
+            <div class="text-cyan-300 font-black uppercase tracking-[0.2em] text-xs mb-4">Result</div>
+            <div class="text-slate-200 text-sm leading-7">
+                The LLM cannot inspect<br>
+                object metadata.<br>
+                So Bravo stays invisible.
+            </div>
+        </div>
+        
+
+        <div class="mt-6 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-left">
+            <div class="text-red-400 font-black uppercase tracking-[0.2em] text-xs mb-2">Bottom line</div>
+            <p class="text-slate-200 text-sm leading-7">
+            No <b>get_object_head</b> = no metadata access = no Bravo path.
+            </p>
+        </div>
+        </div>
+
+      </div>
+
+    <div id="api-error-focus" class="api-error-focus">
+      <div class="text-red-400 font-black uppercase tracking-[0.45em] text-xs mb-3">API Contract Failure</div>
+      <div class="text-white text-3xl font-black mb-8 italic">One field changed. The bridge broke.</div>
+      <div class="error-grid-2">
+        <div class="error-pane">
+          <div class="text-red-300 font-black uppercase tracking-[0.2em] text-xs mb-4">Expected</div>
+          <pre class="text-red-200 text-sm leading-7 whitespace-pre-wrap">{
+  "image_data": "..."
+}</pre>
+        </div>
+        <div class="error-pane">
+          <div class="text-cyan-300 font-black uppercase tracking-[0.2em] text-xs mb-4">Returned</div>
+          <pre class="text-cyan-200 text-sm leading-7 whitespace-pre-wrap">{
+  "asset_url": "s3://..."
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div id="loop-error-focus" class="loop-error-focus">
+      <div class="text-amber-400 font-black uppercase tracking-[0.45em] text-xs mb-3">History Failure</div>
+      <div class="text-white text-3xl font-black mb-8 italic">History got full. Important info was lost.</div>
+
+      <div class="error-grid-2">
+        <div class="error-pane">
+          <div class="text-red-300 font-black uppercase tracking-[0.2em] text-xs mb-4">Before pruning</div>
+          <div class="text-slate-200 text-sm leading-7">
+            “Research target = <b>Alpha</b>”<br>
+            “Location = <b>Santa Monica</b>”
+          </div>
+        </div>
+        <div class="error-pane">
+          <div class="text-cyan-300 font-black uppercase tracking-[0.2em] text-xs mb-4">After pruning</div>
+          <div class="text-slate-200 text-sm leading-7">
+            “Run detect again...”<br>
+            “Search nearby robots...”
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-left">
+        <div class="text-amber-400 font-black uppercase tracking-[0.2em] text-xs mb-2">Result</div>
+        <p class="text-slate-200 text-sm leading-7">
+          Lost state → repeated search → agent loop.
+        </p>
+      </div>
+    </div>
+
+    <header class="flex justify-between items-start mb-4 relative z-[60] shrink-0 transition-all duration-500">
+      <div>
+        <h1 class="text-2xl font-black tracking-tighter text-violet-400 uppercase italic">ERA 3: THE HARDCODED SILO</h1>
+        <p id="header-subtitle" class="text-slate-400 text-[10px] mt-1 tracking-widest uppercase italic font-bold">
+          History Upload → LLM Decision → Tool Dispatch
+        </p>
+      </div>
+      <div class="flex gap-4 items-center bg-black/60 px-4 py-2 rounded-full border border-white/5 shadow-2xl">
+        <span class="text-[9px] text-slate-400 uppercase font-bold tracking-widest">Navigation: ← →</span>
+      </div>
+    </header>
+
+    <div id="main-workspace" class="px-2">
+      <div class="flex flex-col items-center space-y-3 h-full justify-start pt-2 relative z-50">
+        <div class="grid grid-cols-2 gap-2 shrink-0 relative">
+          <div id="app-aws" class="app-tile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6"><path d="M21 8V21H3V8"/><path d="M1 3h22v5H1z"/></svg>
+            <span>AWS S3</span>
+          </div>
+          <div id="app-gitlab" class="app-tile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6"><path d="m22 13-10 9-10-9V6l10-4 10 4v7Z"/></svg>
+            <span>GitLab-ML</span>
+          </div>
+          <div id="app-browser" class="app-tile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <span>Browser</span>
+          </div>
+          <div id="app-email" class="app-tile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6"><path d="m22 2-11 11"/><path d="M22 2-7 20-4-9-9-4Z"/></svg>
+            <span>SMTP Relay</span>
+          </div>
+        </div>
+
+        <div id="user-console" class="w-full flex-1 min-h-0 pr-2">
+          <div id="u-1" class="chat-bubble user-msg visible">
+            "Find Alpha's last position in <b>my-robotics-data-2026</b>. Check news at that location. Find Alpha image or check <b>nearby robots</b>. Run detect and email report."
+          </div>
+
+          <div id="transient-msg" class="chat-bubble user-msg text-xs bg-cyan-500/10 border-cyan-400"></div>
+
+          <div id="u-3" class="chat-bubble user-msg text-violet-300 italic">
+            "Bravo problem: <b>get_object_head</b> is not hardcoded in the bridge."
+            <span class="highlight-tax text-white uppercase tracking-tighter">Without that tool, the model cannot inspect object metadata, so Bravo stays invisible.</span>
+          </div>
+
+          <div id="u-4" class="chat-bubble user-msg font-bold text-red-500 border-l-4 border-red-600 bg-red-500/10">
+            "CRITICAL AMNESIA: Context full. Pruning oldest history."
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center justify-center relative h-full">
+        <div class="wrapper-hub" id="hub-core">
+          <div class="bridge-title">Hardcoded Bridge</div>
+
+          <div id="bridge-call-preview" class="tool-call-preview empty">
+            <div class="preview-label">llm output</div>
+            <div id="bridge-call-content">Waiting for decision payload...</div>
+          </div>
+
+          <div id="hub-log">
+            <span style="color:#f59e0b;">// STATIC ORCHESTRATOR</span><br>
+            rolling_history += user_input;<br>
+            decision = llm(history + schemas);<br><br>
+
+            if decision.type == 'tool_call':<br>
+            &nbsp;&nbsp;tool_payload = extract_args(decision);<br>
+            &nbsp;&nbsp;show_at_top(tool_payload);<br>
+            &nbsp;&nbsp;result = call_hardcoded_tool(tool_payload);<br>
+            &nbsp;&nbsp;rolling_history += summary_or_ref(result);<br><br>
+
+            else:<br>
+            &nbsp;&nbsp;render_text(decision.content);
+          </div>
+        </div>
+        <div class="text-[9px] font-black uppercase mt-4 italic" style="color:#b45309;">Hardcoded Translation</div>
+      </div>
+
+      <div class="prompt-column flex flex-col items-center space-y-3 h-full min-h-0 justify-start pt-2 relative z-50">
+        <div id="context-zone" class="prompt-zone relative w-full flex flex-col items-center">
+          <div id="context-fence" class="context-fence"></div>
+
+          <div class="brain-stack mb-2" id="brain-visual">
+            <div class="brain-label-top">LLM Brain</div>
+            <div class="brain-core">
+              <div class="brain-halo"></div>
+              <div id="brain-nodes-container"></div>
+              <svg width="74" height="74" viewBox="0 0 24 24" fill="none" stroke="#9d00ff" stroke-width="1.5">
+                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"/>
+              </svg>
+            </div>
+          </div>
+
+          <div id="context-package" class="context-container">
+            <div id="system-prompt" class="system-prompt-block">
+              <div class="block-label text-red-500">System Prompt</div>
+              <div class="mt-2 space-y-4">
+                <div><span class="font-bold text-white uppercase text-[5px]">list_s3</span><br>{ "name": "list_s3", "params": {"folder": "string"} }</div>
+                <div><span class="font-bold text-white uppercase text-[5px]">get_s3</span><br>{ "name": "get_s3", "params": {"key": "string"} }</div>
+                <div><span class="font-bold text-white uppercase text-[5px]">scrape</span><br>{ "name": "scrape", "params": {"url": "string"} }</div>
+                <div><span class="font-bold text-white uppercase text-[5px]">detect</span><br>{ "name": "detect", "params": {"asset_url": "string"} }</div>
+                <div><span class="font-bold text-white uppercase text-[5px]">send_email</span><br>{ "name": "send_email", "params": {"to": "string", "body": "string"} }</div>
+              </div>
+            </div>
+
+            <div id="history-block" class="history-block">
+              <div class="block-label text-violet-400">Embedded History</div>
+              <div id="history-content" class="flex flex-col items-center justify-center h-full space-y-2 mt-4 text-[6px]">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-20 animate-pulse">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <div class="opacity-30 italic">No history embedded...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="ai-console" class="w-full flex-1 min-h-0 pl-2 pt-1">
+          <div id="a-current" class="chat-bubble ai-msg font-mono text-left"></div>
+          <div id="a-2" class="chat-bubble ai-msg opacity-50 italic text-[9px]">"Bravo unknown... no exposed tool contract."</div>
+          <div id="a-3" class="chat-bubble ai-msg border-2 border-red-500 text-red-300 bg-red-950/20">"Wait... lost target. Restarting search..."</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="footer-caption" class="h-8 flex items-center justify-center border-t border-white/5 text-slate-500 text-[9px] font-black uppercase italic shrink-0 transition-all duration-500">
+      Era Status: Bridge uploads history, LLM returns decisions
+    </div>
+  </div>
+
+  <div id="nm-function-calls" class="nm-chaos-mesh">
+    <div class="nm-stage">
+      <div class="nm-topline">Step 1</div>
+      <div class="nm-title-wrap">
+        <h2>Function Calling Is Different</h2>
+        <p>Same tool idea. Different model-specific wrappers.</p>
+      </div>
+
+      <div class="fn-call-grid">
+        <div class="fn-card">
+          <div class="eyebrow text-green-300">OpenAI style</div>
+          <pre>{
+  "tool_call": {
+    "name": "detect",
+    "arguments": {
+      "asset_url": "..."
+    }
+  }
+}</pre>
+        </div>
+
+        <div class="fn-card">
+          <div class="eyebrow text-yellow-300">Anthropic style</div>
+          <pre>{
+  "type": "tool_use",
+  "name": "detect",
+  "input": {
+    "asset_url": "..."
+  }
+}</pre>
+        </div>
+
+        <div class="fn-card">
+          <div class="eyebrow text-blue-300">Google style</div>
+          <pre>{
+  "functionCall": {
+    "name": "detect",
+    "args": {
+      "asset_url": "..."
+    }
+  }
+}</pre>
+        </div>
+      </div>
+
+      <div class="nm-footer">
+        <div class="nm-footer-card">
+          <p>One tool concept. Different calling conventions.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="nm-chaos" class="nm-chaos-mesh">
+    <div class="nm-stage">
+      <div class="nm-topline">Step 2</div>
+
+      <div class="nm-title-wrap">
+        <h2>The N:M Problem</h2>
+        <p>This becomes a mess.</p>
+      </div>
+
+      <div class="nm-grid">
+        <div class="nm-column-box">
+          <div class="nm-column-title model">Models</div>
+          <div class="nm-column" id="nm-models"></div>
+        </div>
+
+        <div class="nm-center">
+          <svg id="nm-svg"></svg>
+          <div class="nm-overlay-copy">
+            <div class="mess-banner">Each line is custom glue code / translation logic</div>
+          </div>
+        </div>
+
+        <div class="nm-column-box">
+          <div class="nm-column-title tool">Tools</div>
+          <div class="nm-column" id="nm-tools"></div>
+        </div>
+      </div>
+
+      <div class="nm-footer">
+        <div class="nm-footer-card">
+          <p>N models × M tools = too many adapters, mappings, tests, and failures.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="conclusion-box">
+    <div class="text-red-500 font-black uppercase tracking-[0.6em] text-xs mb-4 underline underline-offset-8">Era 3 Architectural Review</div>
+    <p class="text-white text-3xl font-black leading-tight mb-8 italic">Smart Brain, <span class="text-violet-400 underline decoration-violet-400/30 underline-offset-8 tracking-widest">Context Prison</span>.</p>
+    <div class="grid grid-cols-3 gap-8 text-left px-10">
+      <div class="space-y-3 border-l-2 border-cyan-500/30 pl-4">
+        <div class="text-cyan-400 font-black text-[10px] uppercase">1. Discovery Lock</div>
+        <p class="text-slate-400 text-sm italic">Unexposed tools are invisible.</p>
+      </div>
+      <div class="space-y-3 border-l-2 border-amber-500/30 pl-4">
+        <div class="text-amber-400 font-black text-[10px] uppercase">2. Static Hand-off</div>
+        <p class="text-slate-400 text-sm italic">Every call needs rigid translation.</p>
+      </div>
+      <div class="space-y-3 border-l-2 border-red-500/30 pl-4">
+        <div class="text-red-400 font-black text-[10px] uppercase">3. Memory Exhaustion</div>
+        <p class="text-slate-400 text-sm italic">History overload destroys continuity.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const container = document.getElementById('brain-nodes-container');
+    for (let i = 0; i < 30; i++) {
+      const n = document.createElement('div');
+      n.className = 'neural-node';
+      n.style.left = Math.random() * 100 + '%';
+      n.style.top = Math.random() * 100 + '%';
+      n.style.animationDelay = Math.random() * 4 + 's';
+      container.appendChild(n);
+    }
+
+    let currentStep = 0;
+    const totalSteps = 18;
+
+    const wrapper = document.getElementById('presentation-wrapper');
+    const userConsole = document.getElementById('user-console');
+    const aiConsole = document.getElementById('ai-console');
+    const transientMsg = document.getElementById('transient-msg');
+    const aiCurrent = document.getElementById('a-current');
+    const historyContent = document.getElementById('history-content');
+    const contextPackage = document.getElementById('context-package');
+    const jsonModal = document.getElementById('json-modal');
+    const metadataErrorFocus = document.getElementById('metadata-error-focus');
+    const apiErrorFocus = document.getElementById('api-error-focus');
+    const loopErrorFocus = document.getElementById('loop-error-focus');
+    const hub = document.getElementById('hub-core');
+    const labelSuitcase = document.getElementById('label-suitcase');
+    const labelBridge = document.getElementById('label-bridge');
+    const caption = document.getElementById('footer-caption');
+    const conclusion = document.getElementById('conclusion-box');
+    const nmChaos = document.getElementById('nm-chaos');
+    const nmFunctionCalls = document.getElementById('nm-function-calls');
+    const bridgeCallPreview = document.getElementById('bridge-call-preview');
+    const bridgeCallContent = document.getElementById('bridge-call-content');
+
+    const appKeys = ['aws', 'gitlab', 'browser', 'email'];
+
+    function nextStep() {
+      currentStep = (currentStep + 1 > totalSteps) ? 0 : currentStep + 1;
+      updatePresentation();
+    }
+
+    function setPathFor(id, d) {
+      const el = document.getElementById(id);
+      if (el) el.setAttribute('d', d);
+    }
+
+    function setBridgePreview(html) {
+      bridgeCallPreview.classList.remove('empty');
+      bridgeCallContent.innerHTML = html;
+    }
+
+    function resetBridgePreview() {
+      bridgeCallPreview.classList.add('empty');
+      bridgeCallContent.innerHTML = 'Waiting for decision payload...';
+    }
+
+    function clearState() {
+      wrapper.classList.remove('blur-active');
+      hub.style.borderColor = '#f59e0b';
+      hub.style.boxShadow = '0 0 60px rgba(245, 158, 11, 0.18)';
+      contextPackage.classList.remove('zoomed');
+      jsonModal.classList.remove('visible');
+      metadataErrorFocus.classList.remove('visible');
+      apiErrorFocus.classList.remove('visible');
+      loopErrorFocus.classList.remove('visible');
+      conclusion.classList.remove('visible');
+      nmChaos.classList.remove('active');
+      nmFunctionCalls.classList.remove('active');
+      transientMsg.classList.remove('visible');
+      aiCurrent.classList.remove('visible');
+      resetBridgePreview();
+
+      document.querySelectorAll('.app-tile').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.wire').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.wire-glow').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.wire-flow').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.pulse-particle').forEach(el => el.classList.remove('animate'));
+      document.querySelectorAll('.arc-text, .arc-side-label').forEach(el => el.classList.remove('visible'));
+      document.querySelectorAll('.chat-bubble:not(#u-1)').forEach(el => el.classList.remove('visible'));
+
+      labelSuitcase.style.opacity = '0';
+      labelBridge.style.opacity = '0';
+
+      if (currentStep === 0) {
+        historyContent.innerHTML = `
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-20 animate-pulse">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <div class="opacity-30 italic">No history embedded...</div>
+        `;
+      }
+    }
+
+    function updateWires() {
+      const hubRect = hub.getBoundingClientRect();
+      const brainRect = document.getElementById('brain-visual').getBoundingClientRect();
+
+      const hLeftX = hubRect.left;
+      const hRightX = hubRect.right;
+      const hCenterY = hubRect.top + hubRect.height / 2;
+
+      const bLeftX = brainRect.left + 10;
+      const bCenterY = brainRect.top + brainRect.height / 2;
+
+      const historyPath = `M ${hRightX} ${hCenterY}
+          C ${hRightX + 140} ${hCenterY - 220},
+            ${bLeftX - 160} ${bCenterY - 220},
+            ${bLeftX} ${bCenterY - 6}`;
+
+      const decisionPath = `M ${bLeftX} ${bCenterY + 6}
+          C ${bLeftX - 160} ${bCenterY + 220},
+            ${hRightX + 140} ${hCenterY + 220},
+            ${hRightX} ${hCenterY}`;
+
+      ['path-llm-history', 'glow-llm-history', 'flow-llm-history'].forEach(id => setPathFor(id, historyPath));
+      ['path-llm-decision', 'glow-llm-decision', 'flow-llm-decision'].forEach(id => setPathFor(id, decisionPath));
+
+      appKeys.forEach(key => {
+        const appEl = document.getElementById('app-' + key);
+        if (!appEl) return;
+
+        const aRect = appEl.getBoundingClientRect();
+        const aRightX = aRect.right;
+        const aCenterY = aRect.top + aRect.height / 2;
+
+        let lift = 0;
+        let bend = 0;
+
+        if (key === 'aws') { lift = -180; bend = -40; }
+        if (key === 'gitlab') { lift = -55; bend = -10; }
+        if (key === 'browser') { lift = 80; bend = 25; }
+        if (key === 'email') { lift = 205; bend = 50; }
+
+        const path = `M ${hLeftX} ${hCenterY}
+            C ${hLeftX - 150} ${hCenterY + lift},
+              ${aRightX + 140} ${aCenterY + bend},
+              ${aRightX} ${aCenterY}`;
+
+        ['path-' + key, 'glow-' + key, 'flow-' + key + '-dispatch', 'flow-' + key + '-result'].forEach(id => setPathFor(id, path));
+      });
+    }
+
+    function animateParticle(particleId, pathId) {
+      const particle = document.getElementById(particleId);
+      const path = document.getElementById(pathId);
+      if (!particle || !path) return;
+      const d = path.getAttribute('d');
+      particle.style.offsetPath = `path('${d}')`;
+      particle.classList.remove('animate');
+      void particle.offsetWidth;
+      particle.classList.add('animate');
+    }
+
+    function showHistoryUpload() {
+      document.getElementById('path-llm-history').classList.add('active');
+      document.getElementById('glow-llm-history').classList.add('active');
+      document.getElementById('flow-llm-history').classList.add('active');
+      document.getElementById('history-arc-label').classList.add('visible');
+      animateParticle('particle-llm-history', 'path-llm-history');
+    }
+
+    function showDecisionReturn() {
+      document.getElementById('path-llm-decision').classList.add('active');
+      document.getElementById('glow-llm-decision').classList.add('active');
+      document.getElementById('flow-llm-decision').classList.add('active');
+      document.getElementById('decision-arc-label').classList.add('visible');
+      animateParticle('particle-llm-decision', 'path-llm-decision');
+    }
+
+    function showToolDispatch(tool) {
+      document.getElementById('path-' + tool).classList.add('active');
+      document.getElementById('glow-' + tool).classList.add('active');
+      document.getElementById('flow-' + tool + '-dispatch').classList.add('active');
+      document.getElementById(tool + '-label').classList.add('visible');
+      animateParticle('particle-' + tool + '-dispatch', 'path-' + tool);
+    }
+
+    function showToolResult(tool) {
+      document.getElementById('path-' + tool).classList.add('active');
+      document.getElementById('glow-' + tool).classList.add('active');
+      document.getElementById('flow-' + tool + '-result').classList.add('active');
+      document.getElementById(tool + '-label').classList.add('visible');
+      animateParticle('particle-' + tool + '-result', 'path-' + tool);
+    }
+
+    function showDecisionAndDispatch(tool) {
+      showDecisionReturn();
+      setTimeout(() => showToolDispatch(tool), 350);
+    }
+
+    function showResultAndHistory(tool) {
+      showToolResult(tool);
+      setTimeout(() => showHistoryUpload(), 350);
+    }
+
+    function embedToHistory(text, isUser = false) {
+      const div = document.createElement('div');
+      div.className = 'border-b border-violet-500/20 pb-2 mb-2';
+      const label = isUser ? "User Prompt:" : "Embedded:";
+      const labelColor = isUser ? "text-cyan-400" : "text-white";
+      div.innerHTML = `<span class="${labelColor} font-bold opacity-40 text-[8px] uppercase">${label}</span><br>${text}`;
+      if (historyContent.innerHTML.includes('No history')) historyContent.innerHTML = '';
+      historyContent.prepend(div);
+    }
+
+    function createNMVisual() {
+      const modelsWrap = document.getElementById('nm-models');
+      const toolsWrap = document.getElementById('nm-tools');
+      const svg = document.getElementById('nm-svg');
+
+      modelsWrap.innerHTML = '';
+      toolsWrap.innerHTML = '';
+      svg.innerHTML = '';
+
+      const models = [
+        'OpenAI',
+        'Anthropic',
+        'Google',
+        'Llama',
+        'Mistral'
+      ];
+
+      const tools = [
+        'AWS S3',
+        'GitLab Detect',
+        'Browser',
+        'SMTP',
+        'Bravo'
+      ];
+
+      models.forEach(name => {
+        const el = document.createElement('div');
+        el.className = 'nm-node nm-model';
+        el.textContent = name;
+        modelsWrap.appendChild(el);
+      });
+
+      tools.forEach(name => {
+        const el = document.createElement('div');
+        el.className = 'nm-node nm-tool';
+        el.textContent = name;
+        toolsWrap.appendChild(el);
+      });
+
+      requestAnimationFrame(() => {
+        const host = svg.getBoundingClientRect();
+        const leftNodes = [...modelsWrap.children];
+        const rightNodes = [...toolsWrap.children];
+
+        leftNodes.forEach((ln) => {
+          const lr = ln.getBoundingClientRect();
+          const x1 = lr.right - host.left;
+          const y1 = lr.top + lr.height / 2 - host.top;
+
+          rightNodes.forEach((rn) => {
+            const rr = rn.getBoundingClientRect();
+            const x2 = rr.left - host.left;
+            const y2 = rr.top + rr.height / 2 - host.top;
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const midX = (x1 + x2) / 2;
+            path.setAttribute('d', `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', '#f43f5e');
+            path.setAttribute('stroke-width', '1.2');
+            path.setAttribute('opacity', '0.28');
+            svg.appendChild(path);
+          });
+        });
+      });
+    }
+
+    function updatePresentation() {
+      clearState();
+
+      if (currentStep === 0) {
+        caption.innerText = "Era Status: Bridge uploads history, LLM returns decisions";
+      }
+      else if (currentStep === 1) {
+        embedToHistory("Find Alpha. Check location. Check nearby robots. Run detect and email report.", true);
+        showHistoryUpload();
+        caption.innerText = "Step 01: The bridge uploads rolling history into the LLM.";
+      }
+      else if (currentStep === 2) {
+        wrapper.classList.add('blur-active');
+        labelSuitcase.style.opacity = '1';
+        contextPackage.classList.add('zoomed');
+        showHistoryUpload();
+        caption.innerText = "Step 02: Schemas + rolling history are stuffed into context.";
+      }
+      else if (currentStep === 3) {
+        wrapper.classList.add('blur-active');
+        contextPackage.classList.add('zoomed');
+        jsonModal.classList.add('visible');
+        showHistoryUpload();
+        caption.innerText = "Step 03: JSON gives structure, but the tax is manual translation.";
+      }
+      else if (currentStep === 4) {
+        const payload = `{
+  "type": "tool_call",
+  "call": "list_s3",
+  "args": { "folder": "alpha/gps/" }
+}`;
+        aiCurrent.innerHTML = `<div class="bg-black/40 p-2 rounded-xl border border-violet-500/30 text-[9px]">${payload.replace(/\n/g,'<br>')}</div>`;
+        aiCurrent.classList.add('visible');
+        setBridgePreview(`<pre class="m-0 whitespace-pre-wrap text-[9px] leading-5">${payload}</pre>`);
+        document.getElementById('app-aws').classList.add('active');
+        showDecisionAndDispatch('aws');
+        caption.innerText = "Step 04: Tool call is visible at the top of the bridge.";
+      }
+      else if (currentStep === 5) {
+        transientMsg.innerHTML = "<b>Tool Result:</b> alpha/gps/20250108_0900.json found.";
+        transientMsg.classList.add('visible');
+        setBridgePreview(`<pre class="m-0 whitespace-pre-wrap text-[9px] leading-5">{
+  "tool_result": "list_s3",
+  "item": "alpha/gps/20250108_0900.json"
+}</pre>`);
+        document.getElementById('app-aws').classList.add('active');
+        labelBridge.style.opacity = '1';
+        showResultAndHistory('aws');
+        embedToHistory("alpha/gps/20250108_0900.json");
+        caption.innerText = "Step 05: Result returns, then gets embedded back into history.";
+      }
+      else if (currentStep === 6) {
+        const payload = `{
+  "type": "tool_call",
+  "call": "get_s3",
+  "args": { "key": "alpha/gps/20250108_0900.json" }
+}`;
+        aiCurrent.innerHTML = `<div class="bg-black/40 p-2 rounded-xl border border-violet-500/30 text-[9px]">${payload.replace(/\n/g,'<br>')}</div>`;
+        aiCurrent.classList.add('visible');
+        setBridgePreview(`<pre class="m-0 whitespace-pre-wrap text-[9px] leading-5">${payload}</pre>`);
+        document.getElementById('app-aws').classList.add('active');
+        showDecisionAndDispatch('aws');
+        caption.innerText = "Step 06: The model sees the new history and decides again.";
+      }
+      else if (currentStep === 7) {
+        transientMsg.innerHTML = "<b>Tool Result:</b> lat: 34.0195, lon: -118.4912.";
+        transientMsg.classList.add('visible');
+        setBridgePreview(`<pre class="m-0 whitespace-pre-wrap text-[9px] leading-5">{
+  "tool_result": "get_s3",
+  "gps": { "lat": 34.0195, "lon": -118.4912 }
+}</pre>`);
+        document.getElementById('app-aws').classList.add('active');
+        showResultAndHistory('aws');
+        embedToHistory("Alpha location = Santa Monica.");
+        caption.innerText = "Step 07: Important mission state is now only living inside history.";
+      }
+      else if (currentStep === 8) {
+        const payload = `{
+  "type": "tool_call",
+  "call": "scrape",
+  "args": { "url": "news.santa-monica.local" }
+}`;
+        aiCurrent.innerHTML = `<div class="bg-black/40 p-2 rounded-xl border border-cyan-500/30 text-[9px]">${payload.replace(/\n/g,'<br>')}</div>`;
+        aiCurrent.classList.add('visible');
+        setBridgePreview(`<pre class="m-0 whitespace-pre-wrap text-[9px] leading-5">${payload}</pre>`);
+        document.getElementById('app-browser').classList.add('active');
+        showDecisionAndDispatch('browser');
+        caption.innerText = "Step 08: Another decision, another hardcoded dispatch.";
+      }
+      else if (currentStep === 9) {
+        transientMsg.innerHTML = "<b>Tool Result:</b> High winds and wildfire alert.";
+        transientMsg.classList.add('visible');
+        setBridgePreview(`<pre class="m-0 whitespace-pre-wrap text-[9px] leading-5">{
+  "tool_result": "scrape",
+  "summary": "wildfire alert"
+}</pre>`);
+        document.getElementById('app-browser').classList.add('active');
+        showResultAndHistory('browser');
+        embedToHistory("News = wildfire alert.");
+        caption.innerText = "Step 09: More results are appended. History keeps growing.";
+      }
+      else if (currentStep === 10) {
+        const payload = `{
+  "type": "tool_call",
+  "call": "detect",
+  "args": { "asset_url": "s3://.../bravo/cam.jpg" }
+}`;
+        aiCurrent.innerHTML = `<div class="bg-black/40 p-2 rounded-xl border border-cyan-500/30 text-[9px]">${payload.replace(/\n/g,'<br>')}</div>`;
+        aiCurrent.classList.add('visible');
+        setBridgePreview(`<pre class="m-0 whitespace-pre-wrap text-[9px] leading-5">${payload}</pre>`);
+        document.getElementById('app-gitlab').classList.add('active');
+        showDecisionAndDispatch('gitlab');
+        caption.innerText = "Step 10: The model can only call tools it has been taught to call.";
+      }
+      else if (currentStep === 11) {
+        transientMsg.innerHTML = "<b>Tool Result:</b> Detection completed.";
+        transientMsg.classList.add('visible');
+        setBridgePreview(`<pre class="m-0 whitespace-pre-wrap text-[9px] leading-5">{
+  "tool_result": "detect",
+  "status": "done"
+}</pre>`);
+        document.getElementById('app-email').classList.add('active');
+        showResultAndHistory('email');
+        embedToHistory("Detection done.");
+        caption.innerText = "Step 11: The bridge keeps shoving state back into history.";
+      }
+      else if (currentStep === 12) {
+        document.getElementById('u-3').classList.add('visible');
+        document.getElementById('a-2').classList.add('visible');
+        wrapper.classList.add('blur-active');
+        metadataErrorFocus.classList.add('visible');
+        hub.style.borderColor = '#ef4444';
+        hub.style.boxShadow = '0 0 80px rgba(239, 68, 68, 0.45)';
+        embedToHistory("<span class='text-red-500 font-bold'>Bravo unreachable: not exposed + no call contract.</span>");
+        caption.innerText = "Step 12: Bravo failure. get_object_head is not hardcoded, so metadata cannot be inspected.";
+      }
+      else if (currentStep === 13) {
+        wrapper.classList.add('blur-active');
+        apiErrorFocus.classList.add('visible');
+        hub.style.borderColor = '#ef4444';
+        hub.style.boxShadow = '0 0 100px #ef4444';
+        embedToHistory("<span class='text-red-500 font-bold'>API drift detected.</span>");
+        caption.innerText = "Step 13: One field mismatch breaks the bridge.";
+      }
+      else if (currentStep === 14) {
+        document.getElementById('u-4').classList.add('visible');
+        document.getElementById('a-3').classList.add('visible');
+        historyContent.innerHTML = '<div class="text-red-500 font-bold uppercase mt-4 text-center">[CONTEXT PRUNED]</div>';
+        caption.innerText = "Step 14: History fills up. Older facts are cut.";
+      }
+      else if (currentStep === 15) {
+        wrapper.classList.add('blur-active');
+        loopErrorFocus.classList.add('visible');
+        caption.innerText = "Step 15: Important research state is lost. The loop restarts badly.";
+      }
+      else if (currentStep === 16) {
+        wrapper.classList.add('blur-active');
+        conclusion.classList.add('visible');
+        caption.innerText = "Era 3 Review: Smart Brain, Context Prison";
+      }
+      else if (currentStep === 17) {
+        nmFunctionCalls.classList.add('active');
+        caption.innerText = "Step 17: Same idea, different function-calling shapes.";
+      }
+      else if (currentStep === 18) {
+        nmChaos.classList.add('active');
+        createNMVisual();
+        caption.innerText = "Step 18: Now multiply that by every model and every tool.";
+      }
+
+      setTimeout(() => {
+        userConsole.scrollTo({ top: userConsole.scrollHeight, behavior: 'smooth' });
+        aiConsole.scrollTo({ top: aiConsole.scrollHeight, behavior: 'smooth' });
+      }, 100);
+
+      updateWires();
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') nextStep();
+      if (e.key === 'ArrowLeft') {
+        currentStep = (currentStep - 1 < 0) ? totalSteps : currentStep - 1;
+        updatePresentation();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      updateWires();
+      if (nmChaos.classList.contains('active')) createNMVisual();
+    });
+
+    setTimeout(() => {
+      updateWires();
+      updatePresentation();
+    }, 100);
+  </script>
+</body>
+</html>

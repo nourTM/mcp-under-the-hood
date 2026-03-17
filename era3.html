@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Era 3: Hardcoded Silos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        body { background: #05060b; color: white; font-family: 'JetBrains Mono', monospace; margin: 0; overflow: hidden; height: 100vh; }
+        
+        #presentation-wrapper {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding: 1.5rem;
+            box-sizing: border-box;
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .brain-core {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(157, 0, 255, 0.15) 0%, transparent 80%);
+            border: 1px solid rgba(157, 0, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .neural-node {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #9d00ff;
+            border-radius: 50%;
+            filter: blur(1px);
+            animation: neural-pulse 4s infinite ease-in-out;
+        }
+
+        @keyframes neural-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.2; }
+            50% { transform: scale(2.5); opacity: 0.7; box-shadow: 0 0 10px #9d00ff; }
+        }
+
+        .wrapper-hub {
+            width: 200px;
+            height: 200px;
+            border: 4px solid #9d00ff;
+            background: rgba(157, 0, 255, 0.1);
+            border-radius: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 50;
+            box-shadow: 0 0 60px rgba(157, 0, 255, 0.2);
+            flex-shrink: 0;
+            transition: all 0.5s;
+        }
+
+        .system-prompt-block {
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #f43f5e;
+            border-radius: 12px;
+            padding: 10px;
+            font-size: 8px;
+            color: #f43f5e;
+            max-height: 180px;
+            overflow: hidden;
+            position: relative;
+            line-height: 1.2;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 0 30px rgba(244, 63, 94, 0.2);
+        }
+        
+        .system-prompt-block::after {
+            content: "HARDCODED SCHEMAS";
+            position: absolute;
+            top: 4px;
+            right: 10px;
+            font-weight: 900;
+            color: #f43f5e;
+            font-size: 7px;
+            letter-spacing: 2px;
+        }
+
+        #user-console, #ai-console {
+            overflow-y: auto !important;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            scroll-behavior: smooth;
+            padding-bottom: 20px;
+            height: 100%;
+        }
+        #user-console::-webkit-scrollbar, #ai-console::-webkit-scrollbar { display: none; }
+
+        .chat-bubble {
+            max-width: 95%;
+            padding: 1rem;
+            border-radius: 1.25rem;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            opacity: 0;
+            display: none;
+            transform: translateY(15px);
+            transition: all 0.4s;
+            line-height: 1.4;
+        }
+        .chat-bubble.visible { opacity: 1; display: block; transform: translateY(0); }
+        .user-msg { background: rgba(0, 242, 255, 0.1); border-left: 5px solid #00f2ff; align-self: flex-start; width: 95%; color: white; }
+        .ai-msg { background: rgba(157, 0, 255, 0.1); border-right: 5px solid #9d00ff; align-self: flex-end; text-align: right; width: 95%; color: #d8b4fe; }
+
+        .app-tile {
+            width: 130px;
+            height: 60px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            transition: all 0.3s;
+            opacity: 0.15;
+            position: relative;
+            z-index: 10;
+        }
+        .app-tile.active { opacity: 1; border-color: #00f2ff; background: rgba(0, 242, 255, 0.15); transform: scale(1.05); }
+        .app-tile span { font-size: 9px; font-weight: bold; text-transform: uppercase; color: #888fb0; }
+        .app-tile svg { width: 24px; height: 24px; }
+
+        .wiring-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .wire { fill: none; stroke: #9d00ff; stroke-width: 2; opacity: 0.1; stroke-dasharray: 6; transition: all 0.5s; }
+        .wire.active { opacity: 0.8; stroke: #00f2ff; stroke-width: 3; stroke-dasharray: none; filter: drop-shadow(0 0 10px #00f2ff); }
+        .wire.brain-link { stroke: #f43f5e; opacity: 0.2; }
+        .wire.brain-link.active { opacity: 0.9; stroke-width: 4; filter: drop-shadow(0 0 15px #f43f5e); }
+
+        @keyframes data-flow {
+            0% { offset-distance: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { offset-distance: 100%; opacity: 0; }
+        }
+
+        .pulse-particle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #00f2ff;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #00f2ff;
+            offset-rotate: auto;
+            visibility: hidden;
+            z-index: 100;
+        }
+        .pulse-particle.animate {
+            visibility: visible;
+            animation: data-flow 1s infinite linear;
+        }
+
+        #conclusion-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 90%;
+            max-width: 1000px;
+            background: rgba(10, 15, 25, 0.99);
+            border: 3px solid #9d00ff;
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            box-shadow: 0 0 200px rgba(157, 0, 255, 0.5);
+            backdrop-filter: blur(25px);
+        }
+        #conclusion-box.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
+
+        .kbd-guide { font-size: 10px; background: #1a1c23; border: 1px solid #334155; padding: 4px 8px; border-radius: 4px; color: #94a3b8; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div id="presentation-wrapper">
+        <!-- Wiring Layer -->
+        <svg class="wiring-svg" id="wires-layer">
+            <path id="path-aws" class="wire" d="M 500 400 Q 300 400 150 200" />
+            <path id="path-gitlab" class="wire" d="M 500 400 Q 300 400 150 300" />
+            <path id="path-news" class="wire" d="M 500 400 Q 300 400 150 400" />
+            <path id="path-email" class="wire" d="M 500 400 Q 300 400 150 500" />
+            <path id="path-llm" class="wire brain-link" d="M 550 400 Q 750 400 850 400" />
+        </svg>
+
+        <div id="particle-generic" class="pulse-particle"></div>
+        <div id="particle-brain" class="pulse-particle" style="background: #f43f5e; box-shadow: 0 0 15px #f43f5e;"></div>
+
+        <!-- Header -->
+        <div class="flex justify-between items-start mb-2 relative z-[60] shrink-0">
+            <div>
+                <h1 class="text-3xl font-black tracking-tighter text-violet-400 uppercase italic">ERA 3: THE HARDCODED SILO</h1>
+                <p class="text-slate-400 text-xs mt-1 tracking-widest uppercase italic font-bold">Manual Rerouting of Chain-of-Thought Intent</p>
+            </div>
+            <div class="flex gap-4 items-center bg-black/60 px-4 py-2 rounded-full border border-white/5 shadow-2xl">
+                <span class="kbd-guide">←</span>
+                <span class="kbd-guide">→</span>
+                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-widest ml-1">Timeline Navigation</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 grid grid-cols-3 gap-6 items-center relative min-h-0 overflow-hidden px-4">
+            
+            <!-- Column 1: Services (The Limbs) -->
+            <div class="flex flex-col items-center space-y-4 h-full justify-start pt-4 relative z-50">
+                <div class="grid grid-cols-2 gap-3 shrink-0 relative">
+                    <div id="app-aws" class="app-tile">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8V21H3V8"/><path d="M1 3h22v5H1z"/></svg>
+                        <span>AWS S3</span>
+                    </div>
+                    <div id="app-gitlab" class="app-tile">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 13-10 9-10-9V6l10-4 10 4v7Z"/></svg>
+                        <span>Detection API</span>
+                    </div>
+                    <div id="app-news" class="app-tile">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11V1m16 10V1M12 21V1M7 21h10"/></svg>
+                        <span>News (REST)</span>
+                    </div>
+                    <div id="app-email" class="app-tile">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-11 11"/><path d="M22 2-7 20-4-9-9-4Z"/></svg>
+                        <span>SMTP Relay</span>
+                    </div>
+                </div>
+
+                <div id="user-console" class="w-full flex-1 min-h-0 pr-4">
+                    <div id="u-1" class="chat-bubble user-msg">"Mission: Find Alpha's position in <b>S3</b>. Find an <b>image</b> near that timestamp. Get a <b>detection report</b>, check <b>local news</b>, and email me a summary."</div>
+                    <div id="u-2" class="chat-bubble user-msg font-bold text-green-400 border-l-4 border-green-500">"The LLM defined its Chain of Thought! Step 1: `list_s3`. Step 2: `run_detection`. Step 3: `get_news`. Step 4: `smtp_send`."</div>
+                    <div id="u-3" class="chat-bubble user-msg text-violet-300 italic">"The Bridge is looping: it captures the LLM's intent and manually triggers the next hard-wired call until the mission is 'reached'."</div>
+                    <div id="u-4" class="chat-bubble user-msg font-bold text-red-500 border-l-4 border-red-600 bg-red-500/10">"CRITICAL: News API changed field `status` to `result`. The bridge expected the old schema. The automated chain has crashed."</div>
+                </div>
+            </div>
+
+            <!-- Column 2: Hardcoded Bridge (The Nervous System) -->
+            <div class="flex flex-col items-center justify-center space-y-4 relative h-full">
+                <div class="wrapper-hub" id="hub-core">
+                    <div class="text-xs font-black text-violet-400 uppercase tracking-widest mb-3">Hardcoded Bridge</div>
+                    <div class="text-[8px] text-slate-400 font-mono text-center px-4 leading-relaxed bg-black/60 py-4 rounded-xl border border-white/10 shadow-inner">
+                        <span class="text-violet-500">// REROUTING LOOP</span><br>
+                        while (mission_incomplete):<br>
+                        &nbsp;&nbsp;intent = llm.get_next_step();<br>
+                        &nbsp;&nbsp;if (intent == 'S3') boto3();<br>
+                        &nbsp;&nbsp;if (intent == 'DET') gitlab();<br>
+                        &nbsp;&nbsp;if (intent == 'MAIL') smtp();
+                    </div>
+                    <div class="absolute -top-4 -right-4 bg-red-600 text-white text-[9px] px-2 py-1 rounded font-black animate-pulse shadow-xl">MANUAL NERVE</div>
+                </div>
+                <div class="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em]">Developer's Manual Labor</div>
+            </div>
+
+            <!-- Column 3: LLM Brain -->
+            <div class="flex flex-col items-center space-y-4 h-full min-h-0 justify-start pt-4 relative z-50">
+                <div class="brain-core shrink-0" id="brain-visual">
+                    <div id="brain-nodes-container"></div>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9d00ff" stroke-width="1.5"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"/></svg>
+                </div>
+
+                <div class="w-full space-y-3">
+                    <div id="system-prompt" class="system-prompt-block">
+                        <span class="text-white font-black opacity-50 block mb-1 underline tracking-wider text-[7px]">PROFESSIONAL SCHEMAS INJECTED</span>
+                        { "name": "list_s3_objects", "params": {...} }<br>
+                        { "name": "run_detection", "params": {"url": "str"} }<br>
+                        { "name": "get_news", "params": {"loc": "str"} }<br>
+                        { "name": "smtp_send_email", "params": {...} }<br>
+                        // Blind to anything not listed above.
+                    </div>
+                </div>
+
+                <div id="ai-console" class="w-full flex-1 min-h-0 pl-4 pt-2">
+                    <div id="a-1" class="chat-bubble ai-msg font-mono">
+                        <span class="text-violet-400 font-bold uppercase block mb-1 text-[9px]">CHAIN OF THOUGHT:</span>
+                        <div class="bg-black/40 p-2 rounded-xl border border-violet-500/30 text-[10px] text-violet-300">
+                            1. Fetch S3 logs for Alpha<br>
+                            2. Identify Image near 02:30Z<br>
+                            3. Invoke run_detection<br>
+                            4. Compile and SMTP
+                        </div>
+                    </div>
+                    <div id="a-2" class="chat-bubble ai-msg opacity-50 italic text-[11px]">"I have designed the plan, but I am fenced in. If the bridge doesn't support the 'Tags' tool, I cannot pivot to Bravo."</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="footer-caption" class="h-10 flex items-center justify-center border-t border-white/5 text-slate-500 text-[10px] font-black tracking-[0.2em] uppercase italic shrink-0">
+            Era Status: High Agency • Brittle Manual Rerouting
+        </div>
+    </div>
+
+    <!-- Conclusion Overlay -->
+    <div id="conclusion-box">
+        <div class="text-red-500 font-black uppercase tracking-[0.6em] text-sm mb-4 underline underline-offset-8">Era 3 Architectural Review</div>
+        <p class="text-white text-3xl font-black leading-tight mb-8">
+            Smart Brain, <span class="text-violet-400 underline decoration-violet-400/30 underline-offset-8">Hard-Wired Limbs</span>.
+        </p>
+        
+        <div class="grid grid-cols-3 gap-8 text-left">
+            <div class="space-y-3 border-l-2 border-cyan-500/30 pl-4">
+                <div class="text-cyan-400 font-black text-xs uppercase tracking-widest">1. Forced Schemas</div>
+                <p class="text-slate-400 text-sm leading-relaxed font-bold italic">The LLM doesn't "discover." Every professional tool is <b>hard-stuffed</b> into the prompt. No dynamic handshake.</p>
+            </div>
+            <div class="space-y-3 border-l-2 border-amber-500/30 pl-4">
+                <div class="text-amber-400 font-black text-xs uppercase tracking-widest">2. The Reroute Prison</div>
+                <p class="text-slate-400 text-sm leading-relaxed font-bold italic">The AI defines the chain, but the developer must manually code the <b>rerouting bridge</b> for every single tool in that chain.</p>
+            </div>
+            <div class="space-y-3 border-l-2 border-red-500/30 pl-4">
+                <div class="text-red-400 font-black text-xs uppercase tracking-widest">3. CONTRACT FRAGILITY</div>
+                <p class="text-slate-400 text-sm leading-relaxed font-bold italic">If one API field changes, the bridge crashes. The system lacks a protocol; it only has a <b>rigid contract</b>.</p>
+            </div>
+        </div>
+
+        <div class="mt-12 py-8 border-t border-white/10">
+            <span class="text-violet-400 italic text-2xl font-serif">"The LLM defined the goal, but you are still the mechanical nervous system."</span>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('brain-nodes-container');
+        for(let i=0; i<25; i++) {
+            const n = document.createElement('div');
+            n.className = 'neural-node';
+            n.style.left = Math.random() * 100 + '%';
+            n.style.top = Math.random() * 100 + '%';
+            n.style.animationDelay = Math.random() * 4 + 's';
+            container.appendChild(n);
+        }
+
+        let currentStep = 0;
+        const totalSteps = 9; 
+        const wrapper = document.getElementById('presentation-wrapper');
+        const caption = document.getElementById('footer-caption');
+        const userConsole = document.getElementById('user-console');
+        const aiConsole = document.getElementById('ai-console');
+        const conclusion = document.getElementById('conclusion-box');
+        const hub = document.getElementById('hub-core');
+        const promptBlock = document.getElementById('system-prompt');
+
+        function updateWires() {
+            const hubRect = hub.getBoundingClientRect();
+            const brainRect = document.getElementById('brain-visual').getBoundingClientRect();
+            const apps = ['app-aws', 'app-gitlab', 'app-news', 'app-email'].map(id => document.getElementById(id).getBoundingClientRect());
+            
+            const hX = hubRect.left + hubRect.width / 2;
+            const hY = hubRect.top + hubRect.height / 2;
+            
+            const bX = brainRect.left + brainRect.width / 2;
+            const bY = brainRect.top + brainRect.height / 2;
+            document.getElementById('path-llm').setAttribute('d', `M ${hX} ${hY} Q ${(hX+bX)/2} ${hY-80} ${bX} ${bY}`);
+
+            ['path-aws', 'path-gitlab', 'path-news', 'path-email'].forEach((id, i) => {
+                const a = apps[i];
+                const aX = a.left + a.width / 2;
+                const aY = a.top + a.height / 2;
+                document.getElementById(id).setAttribute('d', `M ${hX} ${hY} Q ${(hX+aX)/2} ${hY+40} ${aX} ${aY}`);
+            });
+        }
+
+        window.addEventListener('resize', updateWires);
+        setTimeout(updateWires, 100);
+
+        function animateFlow(targetId) {
+            const p = document.getElementById('particle-generic');
+            const path = document.getElementById(targetId).getAttribute('d');
+            p.style.offsetPath = `path('${path}')`;
+            p.classList.remove('animate');
+            void p.offsetWidth;
+            p.classList.add('animate');
+        }
+
+        function animatePromptInjection() {
+            const p = document.getElementById('particle-brain');
+            const path = document.getElementById('path-llm').getAttribute('d');
+            p.style.offsetPath = `path('${path}')`;
+            p.classList.remove('animate');
+            void p.offsetWidth;
+            p.classList.add('animate');
+        }
+
+        function scrollToBottom() {
+            userConsole.scrollTo({ top: userConsole.scrollHeight, behavior: 'smooth' });
+            aiConsole.scrollTo({ top: aiConsole.scrollHeight, behavior: 'smooth' });
+        }
+
+        function updatePresentation() {
+            wrapper.style.opacity = '1';
+            hub.style.borderColor = '#9d00ff'; hub.style.transform = 'scale(1)';
+            document.querySelectorAll('.chat-bubble').forEach(b => b.classList.remove('visible'));
+            document.querySelectorAll('.app-tile').forEach(a => a.classList.remove('active'));
+            document.querySelectorAll('.wire').forEach(w => w.classList.remove('active'));
+            document.querySelectorAll('.pulse-particle').forEach(p => p.classList.remove('animate'));
+            conclusion.classList.remove('visible');
+
+            if (currentStep >= 1) {
+                document.getElementById('u-1').classList.add('visible');
+                caption.innerText = "Step 01: Initiation. Complex mission request targeting timestamps and external reports.";
+            }
+            if (currentStep === 2) {
+                document.getElementById('path-llm').classList.add('active');
+                animatePromptInjection();
+                caption.innerText = "Step 02: Injection. The Bridge pushes the bloated tool schemas to the LLM.";
+            }
+            if (currentStep === 3) {
+                document.getElementById('a-1').classList.add('visible');
+                caption.innerText = "Step 03: Decision. LLM generates a Chain of Thought using the provided professional schemas.";
+            }
+            if (currentStep === 4) {
+                document.getElementById('u-2').classList.add('visible');
+                document.getElementById('path-aws').classList.add('active');
+                document.getElementById('app-aws').classList.add('active');
+                animateFlow('path-aws');
+                caption.innerText = "Step 04: Hard Reroute. Bridge triggers hand-wired AWS call based on the first plan step.";
+            }
+            if (currentStep === 5) {
+                document.getElementById('u-3').classList.add('visible');
+                document.querySelectorAll('.app-tile').forEach(a => a.classList.add('active'));
+                document.querySelectorAll('.wire').forEach(w => w.classList.add('active'));
+                caption.innerText = "Step 05: The Reroute Loop. The Bridge continues to manually relay calls for Detection and News.";
+            }
+            if (currentStep === 6) {
+                document.getElementById('u-4').classList.add('visible');
+                document.getElementById('a-2').classList.add('visible');
+                hub.style.borderColor = '#f43f5e'; hub.style.transform = 'scale(1.05)';
+                caption.innerText = "Step 06: The Break. External API schema shift crashes the system due to the static bridge contract.";
+            }
+            if (currentStep === 7) {
+                conclusion.classList.add('visible');
+                wrapper.style.opacity = '0.05';
+                caption.innerText = "Final Conclusion: Scaling Paralysis";
+            }
+
+            setTimeout(scrollToBottom, 50);
+            updateWires();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') { currentStep = (currentStep + 1 > totalSteps) ? 0 : currentStep + 1; updatePresentation(); }
+            if (e.key === 'ArrowLeft') { currentStep = (currentStep - 1 < 0) ? totalSteps : currentStep - 1; updatePresentation(); }
+        });
+
+        updatePresentation(); 
+    </script>
+</body>
+</html>

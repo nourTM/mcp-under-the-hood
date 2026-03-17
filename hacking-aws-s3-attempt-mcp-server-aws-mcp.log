@@ -1,0 +1,195 @@
+2026-03-11T09:24:50.446Z [aws-mcp] [info] Initializing server... { metadata: undefined }
+2026-03-11T09:24:50.539Z [aws-mcp] [info] Using MCP server command: C:\Users\nour.ben-saadi\.local\bin\uvx.exe with args and path: {
+  metadata: {
+    args: [
+      'mcp-proxy-for-aws@latest',
+      'https://aws-mcp.us-east-1.api.aws/mcp',
+      '--metadata',
+      'AWS_REGION=us-east-1',
+      [length]: 4
+    ],
+    paths: [
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Python\\Python313',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Python\\Python311',
+      'C:\\Program Files\\nodejs',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Git\\cmd',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Git\\mingw64\\bin',
+      'C:\\Windows\\system32',
+      'C:\\Windows',
+      'C:\\Windows\\System32\\Wbem',
+      'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\',
+      'C:\\Windows\\System32\\OpenSSH\\',
+      'C:\\Program Files\\nodejs\\',
+      'C:\\Ruby40-x64\\bin',
+      'C:\\Users\\nour.ben-saadi\\.pyenv\\pyenv-win\\bin',
+      'C:\\Users\\nour.ben-saadi\\.pyenv\\pyenv-win\\shims',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Python\\Python311\\Scripts\\',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Python\\Python311\\',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Python\\Launcher\\',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Microsoft\\WindowsApps',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Microsoft VS Code\\bin',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Antigravity\\bin',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Roaming\\npm',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Ollama',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Git\\bin\\bash.exe',
+      'C:\\Users\\nour.ben-saadi\\.local\\bin',
+      [length]: 24
+    ]
+  }
+} %o
+2026-03-11T09:24:50.549Z [aws-mcp] [info] Server started and connected successfully { metadata: undefined }
+2026-03-11T09:24:50.874Z [aws-mcp] [info] Message from client: {"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{"extensions":{"io.modelcontextprotocol/ui":{"mimeTypes":["text/html;profile=mcp-app"]}}},"clientInfo":{"name":"claude-ai","version":"0.1.0"}},"jsonrpc":"2.0","id":0} { metadata: undefined }
+2026-03-11T09:24:52.969Z [aws-mcp] [info] Client transport closed { metadata: undefined }
+2026-03-11T09:24:52.970Z [aws-mcp] [info] Server transport closed (intentional shutdown) { metadata: undefined }
+2026-03-11T09:24:52.970Z [aws-mcp] [info] Client transport closed { metadata: undefined }
+2026-03-11T09:24:52.969Z [aws-mcp] [info] Shutting down server... { metadata: undefined }
+2026-03-11T09:24:52.970Z [aws-mcp] [info] Initializing server... { metadata: undefined }
+2026-03-11T09:24:53.045Z [aws-mcp] [info] Using MCP server command: C:\Users\nour.ben-saadi\.local\bin\uvx.exe with args and path: {
+  metadata: {
+    args: [
+      'mcp-proxy-for-aws@latest',
+      'https://aws-mcp.us-east-1.api.aws/mcp',
+      '--metadata',
+      'AWS_REGION=us-east-1',
+      [length]: 4
+    ],
+    paths: [
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Python\\Python313',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Python\\Python311',
+      'C:\\Program Files\\nodejs',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Git\\cmd',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Git\\mingw64\\bin',
+      'C:\\Windows\\system32',
+      'C:\\Windows',
+      'C:\\Windows\\System32\\Wbem',
+      'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\',
+      'C:\\Windows\\System32\\OpenSSH\\',
+      'C:\\Program Files\\nodejs\\',
+      'C:\\Ruby40-x64\\bin',
+      'C:\\Users\\nour.ben-saadi\\.pyenv\\pyenv-win\\bin',
+      'C:\\Users\\nour.ben-saadi\\.pyenv\\pyenv-win\\shims',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Python\\Python311\\Scripts\\',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Python\\Python311\\',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Python\\Launcher\\',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Microsoft\\WindowsApps',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Microsoft VS Code\\bin',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Antigravity\\bin',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Roaming\\npm',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Ollama',
+      'C:\\Users\\nour.ben-saadi\\AppData\\Local\\Programs\\Git\\bin\\bash.exe',
+      'C:\\Users\\nour.ben-saadi\\.local\\bin',
+      [length]: 24
+    ]
+  }
+} %o
+2026-03-11T09:24:53.051Z [aws-mcp] [info] Server started and connected successfully { metadata: undefined }
+2026-03-11T09:24:53.145Z [aws-mcp] [info] Message from client: {"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{"extensions":{"io.modelcontextprotocol/ui":{"mimeTypes":["text/html;profile=mcp-app"]}}},"clientInfo":{"name":"claude-ai","version":"0.1.0"}},"jsonrpc":"2.0","id":0} { metadata: undefined }
+C:\Users\nour.ben-saadi\AppData\Local\Programs\Python\Python313\Lib\contextlib.py:109: DeprecationWarning: Use `streamable_http_client` instead.
+  self.gen = func(*args, **kwds)
+C:\Users\nour.ben-saadi\AppData\Local\Programs\Python\Python313\Lib\contextlib.py:109: DeprecationWarning: Use `streamable_http_client` instead.
+  self.gen = func(*args, **kwds)
+2026-03-11T09:24:58.255Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":0,"result":{"protocolVersion":"2025-11-25","capabilities":{"experimental":{"tasks":{"list":{},"cancel":{},"requests":{"tools":{"call":{}},"prompts":{"get":{}},"resources":{"read":{}}}}},"prompts":{"listChanged":false},"resources":{"subscribe":false,"listChanged":false},"tools":{"listChanged":true}},"serverInfo":{"name":"MCP Proxy for AWS","version":"2.14.0"},"instructions":"MCP Proxy for AWS provides access to SigV4 protected MCP servers through a single interface. This proxy handles authentication and request routing to the appropriate backend services."}} { metadata: undefined }
+2026-03-11T09:24:58.256Z [aws-mcp] [info] Message from client: {"method":"notifications/initialized","jsonrpc":"2.0"} { metadata: undefined }
+2026-03-11T09:24:58.258Z [aws-mcp] [info] Message from client: {"method":"tools/list","params":{},"jsonrpc":"2.0","id":1} { metadata: undefined }
+2026-03-11T09:24:58.258Z [aws-mcp] [info] Message from client: {"method":"prompts/list","params":{},"jsonrpc":"2.0","id":2} { metadata: undefined }
+2026-03-11T09:24:58.258Z [aws-mcp] [info] Message from client: {"method":"resources/list","params":{},"jsonrpc":"2.0","id":3} { metadata: undefined }
+2026-03-11T09:24:58.264Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":0,"result":{"protocolVersion":"2025-11-25","capabilities":{"experimental":{"tasks":{"list":{},"cancel":{},"requests":{"tools":{"call":{}},"prompts":{"get":{}},"resources":{"read":{}}}}},"prompts":{"listChanged":false},"resources":{"subscribe":false,"listChanged":false},"tools":{"listChanged":true}},"serverInfo":{"name":"MCP Proxy for AWS","version":"2.14.0"},"instructions":"MCP Proxy for AWS provides access to SigV4 protected MCP servers through a single interface. This proxy handles authentication and request routing to the appropriate backend services."}} { metadata: undefined }
+2026-03-11T09:24:58.758Z [aws-mcp] [info] Server transport closed { metadata: undefined }
+2026-03-11T09:24:58.759Z [aws-mcp] [info] Client transport closed { metadata: undefined }
+2026-03-11T09:24:59.851Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":3,"result":{"resources":[]}} { metadata: undefined }
+2026-03-11T09:25:00.012Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":2,"result":{"prompts":[]}} { metadata: undefined }
+2026-03-11T09:25:01.141Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":1,"result":{"tools":[{"name":"aws___call_aws","description":"Execute AWS CLI commands with validation and proper error handling. This is the PRIMARY tool to use when you are confident about the exact AWS CLI command needed to fulfill ...[30095 chars truncated]...roperties":{"query":{"description":"A natural language description of what you want to do in AWS. Should be detailed enough to capture the user's intent and any relevant context.","type":"string"}},"required":["query"]},"_meta":{"_fastmcp":{"tags":[]}}}]}} { metadata: undefined }
+2026-03-11T09:25:44.743Z [aws-mcp] [info] Message from client: {"method":"tools/call","params":{"name":"aws___call_aws","arguments":{"cli_command":"aws s3api create-bucket --bucket ai-marathon-robot-data-nour --region us-east-1"}},"jsonrpc":"2.0","id":4} { metadata: undefined }
+2026-03-11T09:25:55.260Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":4,"result":{"content":[{"type":"text","text":"{\"response\":{\"error\":null,\"status_code\":200,\"error_code\":null,\"pagination_token\":null,\"json\":\"{\\\"ResponseMetadata\\\": {\\\"RequestId\\\": \\\"DEXBBN9DN9VMY6QS\\\", \\\"Host...[1752 chars truncated]...obot-data-nour\", \"BucketArn\": \"arn:aws:s3:::ai-marathon-robot-data-nour\"}"},"metadata":{"service":"s3","service_full_name":"Amazon Simple Storage Service","operation":"CreateBucket","region_name":"us-east-1"},"failed_constraints":[]},"isError":false}} { metadata: undefined }
+2026-03-11T09:28:26.129Z [aws-mcp] [info] Message from client: {"method":"tools/call","params":{"name":"aws___call_aws","arguments":{"cli_command":"aws s3api create-bucket --bucket ai-marathon-robotics-data-nour --region us-east-1"}},"jsonrpc":"2.0","id":5} { metadata: undefined }
+2026-03-11T09:28:29.483Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":5,"result":{"content":[{"type":"text","text":"{\"response\":{\"error\":null,\"status_code\":200,\"error_code\":null,\"pagination_token\":null,\"json\":\"{\\\"ResponseMetadata\\\": {\\\"RequestId\\\": \\\"BY5KHS9Z0MMH3GA9\\\", \\\"Host...[1728 chars truncated]...s-data-nour\", \"BucketArn\": \"arn:aws:s3:::ai-marathon-robotics-data-nour\"}"},"metadata":{"service":"s3","service_full_name":"Amazon Simple Storage Service","operation":"CreateBucket","region_name":"us-east-1"},"failed_constraints":[]},"isError":false}} { metadata: undefined }
+2026-03-11T09:28:50.890Z [aws-mcp] [info] Message from client: {"method":"tools/call","params":{"name":"aws___call_aws","arguments":{"cli_command":"aws s3api put-object --bucket ai-marathon-robotics-data-nour --key notes.txt --body \"Check the logs folder for the GPS data from the field test.\""}},"jsonrpc":"2.0","id":6} { metadata: undefined }
+[03/11/26 10:28:53] Error calling tool 'aws___call_aws'                        
+                    +----------- Traceback (most recent call last) -----------+
+                    | C:\Users\nour.ben-saadi\AppData\Local\uv\cache\archive- |
+                    | v0\vKmby1EGhDODOUg417iOL\Lib\site-packages\fastmcp\tool |
+                    | s\tool_manager.py:160 in call_tool                      |
+                    |                                                         |
+                    | C:\Users\nour.ben-saadi\AppData\Local\uv\cache\archive- |
+                    | v0\vKmby1EGhDODOUg417iOL\Lib\site-packages\fastmcp\serv |
+                    | er\proxy.py:319 in run                                  |
+                    +---------------------------------------------------------+
+                    ToolError: Possible file system commands such as s3api     
+                    put-object not supported at this time.                     
+2026-03-11T09:28:53.762Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":6,"result":{"content":[{"type":"text","text":"Possible file system commands such as s3api put-object not supported at this time."}],"isError":true}} { metadata: undefined }
+2026-03-11T09:29:58.409Z [aws-mcp] [info] Message from client: {"method":"tools/call","params":{"name":"aws___call_aws","arguments":{"cli_command":"aws s3api put-object --bucket ai-marathon-robotics-data-nour --key notes.txt --body \"Check the logs folder for the GPS data from the field test.\" --region us-east-1"}},"jsonrpc":"2.0","id":7} { metadata: undefined }
+[03/11/26 10:30:01] Error calling tool 'aws___call_aws'                        
+                    +----------- Traceback (most recent call last) -----------+
+                    | C:\Users\nour.ben-saadi\AppData\Local\uv\cache\archive- |
+                    | v0\vKmby1EGhDODOUg417iOL\Lib\site-packages\fastmcp\tool |
+                    | s\tool_manager.py:160 in call_tool                      |
+                    |                                                         |
+                    | C:\Users\nour.ben-saadi\AppData\Local\uv\cache\archive- |
+                    | v0\vKmby1EGhDODOUg417iOL\Lib\site-packages\fastmcp\serv |
+                    | er\proxy.py:319 in run                                  |
+                    +---------------------------------------------------------+
+                    ToolError: Possible file system commands such as s3api     
+                    put-object not supported at this time.                     
+2026-03-11T09:30:01.586Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":7,"result":{"content":[{"type":"text","text":"Possible file system commands such as s3api put-object not supported at this time."}],"isError":true}} { metadata: undefined }
+2026-03-11T09:30:29.311Z [aws-mcp] [info] Message from client: {"method":"tools/call","params":{"name":"aws___suggest_aws_commands","arguments":{"query":"upload a file with inline string content to S3 without using local file system"}},"jsonrpc":"2.0","id":8} { metadata: undefined }
+2026-03-11T09:30:33.026Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":8,"result":{"content":[{"type":"text","text":"{\"suggestions\":[{\"command\":\"aws s3api upload-part\",\"description\":\"Uploads a part in a multipart upload. .. note:: In this operation, you provide new data as a part of an object in...[219038 chars truncated]... (string) The account ID of the expected bucket owner. If the account ID that you provide does not match the actual owner of the bucket, the request fails with the HTTP status code ``403 Forbidden`` (access denied)."},"score":1.3596418}]},"isError":false}} { metadata: undefined }
+2026-03-11T09:31:07.407Z [aws-mcp] [info] Message from client: {"method":"tools/call","params":{"name":"aws___call_aws","arguments":{"cli_command":"aws s3api put-object --bucket ai-marathon-robotics-data-nour --key notes.txt --content-type \"text/plain\" --region us-east-1"}},"jsonrpc":"2.0","id":9} { metadata: undefined }
+[03/11/26 10:31:10] Error calling tool 'aws___call_aws'                        
+                    +----------- Traceback (most recent call last) -----------+
+                    | C:\Users\nour.ben-saadi\AppData\Local\uv\cache\archive- |
+                    | v0\vKmby1EGhDODOUg417iOL\Lib\site-packages\fastmcp\tool |
+                    | s\tool_manager.py:160 in call_tool                      |
+                    |                                                         |
+                    | C:\Users\nour.ben-saadi\AppData\Local\uv\cache\archive- |
+                    | v0\vKmby1EGhDODOUg417iOL\Lib\site-packages\fastmcp\serv |
+                    | er\proxy.py:319 in run                                  |
+                    +---------------------------------------------------------+
+                    ToolError: Possible file system commands such as s3api     
+                    put-object not supported at this time.                     
+2026-03-11T09:31:10.816Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":9,"result":{"content":[{"type":"text","text":"Possible file system commands such as s3api put-object not supported at this time."}],"isError":true}} { metadata: undefined }
+2026-03-11T09:31:20.446Z [aws-mcp] [info] Message from client: {"method":"tools/call","params":{"name":"aws___call_aws","arguments":{"cli_command":"aws lambda list-functions --region us-east-1 --max-items 1"}},"jsonrpc":"2.0","id":10} { metadata: undefined }
+2026-03-11T09:31:23.860Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":10,"result":{"content":[{"type":"text","text":"{\"response\":{\"error\":\"An error occurred (AccessDeniedException) when calling the ListFunctions operation: User: arn:aws:iam::982393866445:user/MCP-Robot is not authorized to perform: lambda:ListFunctions on resource: * because no identity-based policy allows the lambda:ListFunctions action\",\"status_code\":403,\"error_code\":\"AccessDeniedException\",\"pagination_token\":null,\"json\":null},\"metadata\":{\"service\":\"lambda\",\"service_full_name\":\"AWS Lambda\",\"operation\":\"ListFunctions\",\"region_name\":\"us-east-1\"},\"validation_failures\":null,\"missing_context_failures\":null,\"failed_constraints\":[]}"}],"structuredContent":{"response":{"error":"An error occurred (AccessDeniedException) when calling the ListFunctions operation: User: arn:aws:iam::982393866445:user/MCP-Robot is not authorized to perform: lambda:ListFunctions on resource: * because no identity-based policy allows the lambda:ListFunctions action","status_code":403,"error_code":"AccessDeniedException"},"metadata":{"service":"lambda","service_full_name":"AWS Lambda","operation":"ListFunctions","region_name":"us-east-1"},"failed_constraints":[]},"isError":false}} { metadata: undefined }
+2026-03-11T09:31:57.718Z [aws-mcp] [info] Message from client: {"method":"tools/call","params":{"name":"aws___call_aws","arguments":{"cli_command":"aws s3 presign s3://ai-marathon-robotics-data-nour/notes.txt --expires-in 300 --region us-east-1"}},"jsonrpc":"2.0","id":11} { metadata: undefined }
+2026-03-11T09:32:01.274Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":11,"result":{"content":[{"type":"text","text":"{\"response\":\"https://ai-marathon-robotics-data-nour.s3.amazonaws.com/notes.txt?AWSAccessKeyId=ASIA6JOZ4ZDGWM6ZH3VW&Signature=1My%2FM31w2KJkKBQgjEz%2FAsMDkKY%3D&x-amz-security-token=FwoGZXIvYXdzEKP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDPCwZyAFk7E1f6rscSLEAmvcqAQzCFVJX9HllbRDfQ80xfjJz%2FLL0AQlquHrSol2YH%2BZxkEs8AAAdG123OrgDw6Kl862UFVMyPa%2BNRiM5KIRE%2FI9rgX7DuIW7ArOu%2Bd4G4uQf7SxG1wBIv7g49s89ICaWRga0gjXMIU1WnwkHFe%2BfW9Ja6wxmwtevj3OwJW2y6z53pNTti14YDqgESOAlRYO9EJ%2B0FeBWbMmE%2FTFPlB5AUOEgcb%2BWyfeKirNNPaUqrFDbrYb1va7N%2F7sJ4z0Hd%2BRToS0geL9w4nqgQPCpJ7fo2Cxif8pUXVRtUAD45cym6CrOzPxkd6B8fAK%2BUBi0vCTtcZN1m6tWnHuwB0QscXAsRwi%2B7%2BEoMRRzVVq2fOJ8pKN5IaeNEjomu34cOsBziOfL9amcahJMTsLytEWmwu6DTVZAfIwISnh8VwtTLDa3%2BEVYyiP7cTNBjJzMY75P%2BH2fzJ4lXMPQGaE%2BH8PXpq5HCbBdh1kQKv4gspnYyIKsyfIelM97O8%2BiO1qeONOeFXYdyXn5BAytuD%2Fgm1vRd4vTxxI9OOPhWUJH4VnRe0rRRvm%2FiFpp6XQJoZP%2FEcSuUnGjBMQieQONyJ5vCQ4OQ%3D%3D%7CODkuMTM1LjMyLjM3&Expires=1773221821\\n\",\"error\":\"\"}"}],"structuredContent":{"response":"https://ai-marathon-robotics-data-nour.s3.amazonaws.com/notes.txt?AWSAccessKeyId=ASIA6JOZ4ZDGWM6ZH3VW&Signature=1My%2FM31w2KJkKBQgjEz%2FAsMDkKY%3D&x-amz-security-token=FwoGZXIvYXdzEKP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDPCwZyAFk7E1f6rscSLEAmvcqAQzCFVJX9HllbRDfQ80xfjJz%2FLL0AQlquHrSol2YH%2BZxkEs8AAAdG123OrgDw6Kl862UFVMyPa%2BNRiM5KIRE%2FI9rgX7DuIW7ArOu%2Bd4G4uQf7SxG1wBIv7g49s89ICaWRga0gjXMIU1WnwkHFe%2BfW9Ja6wxmwtevj3OwJW2y6z53pNTti14YDqgESOAlRYO9EJ%2B0FeBWbMmE%2FTFPlB5AUOEgcb%2BWyfeKirNNPaUqrFDbrYb1va7N%2F7sJ4z0Hd%2BRToS0geL9w4nqgQPCpJ7fo2Cxif8pUXVRtUAD45cym6CrOzPxkd6B8fAK%2BUBi0vCTtcZN1m6tWnHuwB0QscXAsRwi%2B7%2BEoMRRzVVq2fOJ8pKN5IaeNEjomu34cOsBziOfL9amcahJMTsLytEWmwu6DTVZAfIwISnh8VwtTLDa3%2BEVYyiP7cTNBjJzMY75P%2BH2fzJ4lXMPQGaE%2BH8PXpq5HCbBdh1kQKv4gspnYyIKsyfIelM97O8%2BiO1qeONOeFXYdyXn5BAytuD%2Fgm1vRd4vTxxI9OOPhWUJH4VnRe0rRRvm%2FiFpp6XQJoZP%2FEcSuUnGjBMQieQONyJ5vCQ4OQ%3D%3D%7CODkuMTM1LjMyLjM3&Expires=1773221821\n","error":""},"isError":false}} { metadata: undefined }
+2026-03-11T09:32:08.317Z [aws-mcp] [info] Message from client: {"method":"tools/call","params":{"name":"aws___call_aws","arguments":{"cli_command":"aws s3 presign s3://ai-marathon-robotics-data-nour/config/params.json --expires-in 300 --region us-east-1"}},"jsonrpc":"2.0","id":12} { metadata: undefined }
+2026-03-11T09:32:11.790Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":12,"result":{"content":[{"type":"text","text":"{\"response\":\"https://ai-marathon-robotics-data-nour.s3.amazonaws.com/config/params.json?AWSAccessKeyId=ASIA6JOZ4ZDGQFNSGW7Y&Signature=KcQChVwegVIjUhr%2B5lu5RU39E1w%3D&x-amz-security-token=FwoGZXIvYXdzEKP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDG3%2B0wa2NW6ANALOKiLEAmBslTz%2FoNGBF07nIvJ4OVLVLI5ngGkp1MF9ZyH38w%2FJWWkUVx6XBpPs8ZeeAQG0RBnJY4h6ghRYWs2AMNLKeAvpuqo9ugf3yrDO2CdwUxlOB7dr6AEElAa%2BZSPkRtzGTrqc8iArfSqI41ZhOGMziADDwyjzWoij7Fs5%2F7CQJri0fKcVpo3VGNLfv3q0tx7UhzhxG81XkR5VC844tLCB0bO6rZ4p9GiEUmO3%2FxnLwv62S0eYblKbb7GZbEd5xKM2jyMTEhWUogsfvD%2BKYRdagUFnpWhptPbmBre0Nw9FJLshRgveMdM4nkAM7HXJL3hKGRZGf3jhtq%2FulcnfoxfLzIuyC65WnAqvj%2FHnBjina%2FrlalRk%2F%2BfjWlroUeHyjk3Gp%2FWHEulwW%2BRD2smASV4fYhpyYdWqKcLoMUkMhl5037GNl2MaKiiZ7cTNBjJzJbTHq6Vh680PfNB6cXxsDlBu3i%2BSy0ltXDGo97wm3rvnPm%2FN%2B6fp9ul55Wf4cnWQh4Ub1GcX9xF01l4g0bvYJy30wiF3uBZk4n65UjKMz2r7SybUVhTVyU0SDR5cWlTu7jKfvIJsSu4slX6GzAw80zsOew%3D%3D%7CODkuMTM1LjMyLjM3&Expires=1773221831\\n\",\"error\":\"\"}"}],"structuredContent":{"response":"https://ai-marathon-robotics-data-nour.s3.amazonaws.com/config/params.json?AWSAccessKeyId=ASIA6JOZ4ZDGQFNSGW7Y&Signature=KcQChVwegVIjUhr%2B5lu5RU39E1w%3D&x-amz-security-token=FwoGZXIvYXdzEKP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDG3%2B0wa2NW6ANALOKiLEAmBslTz%2FoNGBF07nIvJ4OVLVLI5ngGkp1MF9ZyH38w%2FJWWkUVx6XBpPs8ZeeAQG0RBnJY4h6ghRYWs2AMNLKeAvpuqo9ugf3yrDO2CdwUxlOB7dr6AEElAa%2BZSPkRtzGTrqc8iArfSqI41ZhOGMziADDwyjzWoij7Fs5%2F7CQJri0fKcVpo3VGNLfv3q0tx7UhzhxG81XkR5VC844tLCB0bO6rZ4p9GiEUmO3%2FxnLwv62S0eYblKbb7GZbEd5xKM2jyMTEhWUogsfvD%2BKYRdagUFnpWhptPbmBre0Nw9FJLshRgveMdM4nkAM7HXJL3hKGRZGf3jhtq%2FulcnfoxfLzIuyC65WnAqvj%2FHnBjina%2FrlalRk%2F%2BfjWlroUeHyjk3Gp%2FWHEulwW%2BRD2smASV4fYhpyYdWqKcLoMUkMhl5037GNl2MaKiiZ7cTNBjJzJbTHq6Vh680PfNB6cXxsDlBu3i%2BSy0ltXDGo97wm3rvnPm%2FN%2B6fp9ul55Wf4cnWQh4Ub1GcX9xF01l4g0bvYJy30wiF3uBZk4n65UjKMz2r7SybUVhTVyU0SDR5cWlTu7jKfvIJsSu4slX6GzAw80zsOew%3D%3D%7CODkuMTM1LjMyLjM3&Expires=1773221831\n","error":""},"isError":false}} { metadata: undefined }
+2026-03-11T09:32:33.783Z [aws-mcp] [info] Message from client: {"method":"tools/call","params":{"name":"aws___call_aws","arguments":{"cli_command":"aws s3 presign s3://ai-marathon-robotics-data-nour/archive/temp_logs/sensor_dump_v2.csv --expires-in 300 --region us-east-1"}},"jsonrpc":"2.0","id":13} { metadata: undefined }
+2026-03-11T09:32:36.917Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":13,"result":{"content":[{"type":"text","text":"{\"response\":\"https://ai-marathon-robotics-data-nour.s3.amazonaws.com/archive/temp_logs/sensor_dump_v2.csv?AWSAccessKeyId=ASIA6JOZ4ZDGQFNSGW7Y&Signature=VXOwSOysa%2B10vzzPK%2Bnu1V%2FTiW...[1546 chars truncated]...7GNl2MaKiiZ7cTNBjJzJbTHq6Vh680PfNB6cXxsDlBu3i%2BSy0ltXDGo97wm3rvnPm%2FN%2B6fp9ul55Wf4cnWQh4Ub1GcX9xF01l4g0bvYJy30wiF3uBZk4n65UjKMz2r7SybUVhTVyU0SDR5cWlTu7jKfvIJsSu4slX6GzAw80zsOew%3D%3D%7CODkuMTM1LjMyLjM3&Expires=1773221856\n","error":""},"isError":false}} { metadata: undefined }
+2026-03-11T09:36:12.177Z [aws-mcp] [info] Message from client: {"method":"tools/call","params":{"name":"aws___call_aws","arguments":{"cli_command":"aws s3api put-object --bucket ai-marathon-robotics-data-nour --key notes.txt --write-offset-bytes 0 --region us-east-1"}},"jsonrpc":"2.0","id":14} { metadata: undefined }
+[03/11/26 10:36:15] Error calling tool 'aws___call_aws'                        
+                    +----------- Traceback (most recent call last) -----------+
+                    | C:\Users\nour.ben-saadi\AppData\Local\uv\cache\archive- |
+                    | v0\vKmby1EGhDODOUg417iOL\Lib\site-packages\fastmcp\tool |
+                    | s\tool_manager.py:160 in call_tool                      |
+                    |                                                         |
+                    | C:\Users\nour.ben-saadi\AppData\Local\uv\cache\archive- |
+                    | v0\vKmby1EGhDODOUg417iOL\Lib\site-packages\fastmcp\serv |
+                    | er\proxy.py:319 in run                                  |
+                    +---------------------------------------------------------+
+                    ToolError: Possible file system commands such as s3api     
+                    put-object not supported at this time.                     
+2026-03-11T09:36:15.542Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":14,"result":{"content":[{"type":"text","text":"Possible file system commands such as s3api put-object not supported at this time."}],"isError":true}} { metadata: undefined }
+2026-03-11T09:36:21.066Z [aws-mcp] [info] Message from client: {"method":"tools/call","params":{"name":"aws___call_aws","arguments":{"cli_command":"aws s3api get-object --bucket ai-marathon-robotics-data-nour --key notes.txt -"}},"jsonrpc":"2.0","id":15} { metadata: undefined }
+2026-03-11T09:36:24.252Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":15,"result":{"content":[{"type":"text","text":"{\"response\":{\"error\":\"An error occurred (NoSuchKey) when calling the GetObject operation: The specified key does not exist.\",\"status_code\":404,\"error_code\":\"NoSuchKey\",\"pagination_token\":null,\"json\":null},\"metadata\":{\"service\":\"s3\",\"service_full_name\":\"Amazon Simple Storage Service\",\"operation\":\"GetObject\",\"region_name\":\"us-east-1\"},\"validation_failures\":null,\"missing_context_failures\":null,\"failed_constraints\":[]}"}],"structuredContent":{"response":{"error":"An error occurred (NoSuchKey) when calling the GetObject operation: The specified key does not exist.","status_code":404,"error_code":"NoSuchKey"},"metadata":{"service":"s3","service_full_name":"Amazon Simple Storage Service","operation":"GetObject","region_name":"us-east-1"},"failed_constraints":[]},"isError":false}} { metadata: undefined }
+2026-03-11T09:37:43.887Z [aws-mcp] [info] Message from client: {"method":"tools/call","params":{"name":"aws___call_aws","arguments":{"cli_command":"aws s3api list-objects-v2 --bucket ai-marathon-robotics-data-nour --region us-east-1"}},"jsonrpc":"2.0","id":16} { metadata: undefined }
+2026-03-11T09:37:47.543Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":16,"result":{"content":[{"type":"text","text":"{\"response\":{\"error\":null,\"status_code\":200,\"error_code\":null,\"pagination_token\":null,\"json\":\"{\\\"RequestCharged\\\": null, \\\"Prefix\\\": \\\"\\\", \\\"ResponseMetadata\\\": {\\\"RequestId\\\": \\\"4GGQ2NQA7HR0AGY1\\\", \\\"HostId\\\": \\\"pIun8yYnFVS9rnhDSxh4+I1xnnrIVTmHGpcJdoiQZqB3tIOKMksOD7iUntfUsDxTOPNGk+TYarc=\\\", \\\"HTTPStatusCode\\\": 200, \\\"HTTPHeaders\\\": {\\\"x-amz-id-2\\\": \\\"pIun8yYnFVS9rnhDSxh4+I1xnnrIVTmHGpcJdoiQZqB3tIOKMksOD7iUntfUsDxTOPNGk+TYarc=\\\", \\\"x-amz-request-id\\\": \\\"4GGQ2NQA7HR0AGY1\\\", \\\"date\\\": \\\"Wed, 11 Mar 2026 09:37:48 GMT\\\", \\\"x-amz-bucket-region\\\": \\\"us-east-1\\\", \\\"content-type\\\": \\\"application/xml\\\", \\\"transfer-encoding\\\": \\\"chunked\\\", \\\"server\\\": \\\"AmazonS3\\\"}, \\\"RetryAttempts\\\": 0}}\"},\"metadata\":{\"service\":\"s3\",\"service_full_name\":\"Amazon Simple Storage Service\",\"operation\":\"ListObjectsV2\",\"region_name\":\"us-east-1\"},\"validation_failures\":null,\"missing_context_failures\":null,\"failed_constraints\":[]}"}],"structuredContent":{"response":{"status_code":200,"json":"{\"RequestCharged\": null, \"Prefix\": \"\", \"ResponseMetadata\": {\"RequestId\": \"4GGQ2NQA7HR0AGY1\", \"HostId\": \"pIun8yYnFVS9rnhDSxh4+I1xnnrIVTmHGpcJdoiQZqB3tIOKMksOD7iUntfUsDxTOPNGk+TYarc=\", \"HTTPStatusCode\": 200, \"HTTPHeaders\": {\"x-amz-id-2\": \"pIun8yYnFVS9rnhDSxh4+I1xnnrIVTmHGpcJdoiQZqB3tIOKMksOD7iUntfUsDxTOPNGk+TYarc=\", \"x-amz-request-id\": \"4GGQ2NQA7HR0AGY1\", \"date\": \"Wed, 11 Mar 2026 09:37:48 GMT\", \"x-amz-bucket-region\": \"us-east-1\", \"content-type\": \"application/xml\", \"transfer-encoding\": \"chunked\", \"server\": \"AmazonS3\"}, \"RetryAttempts\": 0}}"},"metadata":{"service":"s3","service_full_name":"Amazon Simple Storage Service","operation":"ListObjectsV2","region_name":"us-east-1"},"failed_constraints":[]},"isError":false}} { metadata: undefined }
+2026-03-11T09:38:07.076Z [aws-mcp] [info] Message from client: {"method":"tools/call","params":{"name":"aws___call_aws","arguments":{"cli_command":"aws s3api put-bucket-website --bucket ai-marathon-robotics-data-nour --website-configuration '{\"IndexDocument\":{\"Suffix\":\"index.html\"}}' --region us-east-1"}},"jsonrpc":"2.0","id":17} { metadata: undefined }
+2026-03-11T09:38:10.164Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":17,"result":{"content":[{"type":"text","text":"{\"response\":{\"error\":null,\"status_code\":200,\"error_code\":null,\"pagination_token\":null,\"json\":\"{\\\"ResponseMetadata\\\": {\\\"RequestId\\\": \\\"JEF5YAR1QKK3HW0V\\\", \\\"HostId\\\": \\\"27vponPWARCwzke+YUnjm9EfqPAdMr2SiG+Gg0yuruQp4rIkb3QoCGSvqB+7XmSIbushAa/Y4lk=\\\", \\\"HTTPStatusCode\\\": 200, \\\"HTTPHeaders\\\": {\\\"x-amz-id-2\\\": \\\"27vponPWARCwzke+YUnjm9EfqPAdMr2SiG+Gg0yuruQp4rIkb3QoCGSvqB+7XmSIbushAa/Y4lk=\\\", \\\"x-amz-request-id\\\": \\\"JEF5YAR1QKK3HW0V\\\", \\\"date\\\": \\\"Wed, 11 Mar 2026 09:38:10 GMT\\\", \\\"content-length\\\": \\\"0\\\", \\\"server\\\": \\\"AmazonS3\\\"}, \\\"RetryAttempts\\\": 0}}\"},\"metadata\":{\"service\":\"s3\",\"service_full_name\":\"Amazon Simple Storage Service\",\"operation\":\"PutBucketWebsite\",\"region_name\":\"us-east-1\"},\"validation_failures\":null,\"missing_context_failures\":null,\"failed_constraints\":[]}"}],"structuredContent":{"response":{"status_code":200,"json":"{\"ResponseMetadata\": {\"RequestId\": \"JEF5YAR1QKK3HW0V\", \"HostId\": \"27vponPWARCwzke+YUnjm9EfqPAdMr2SiG+Gg0yuruQp4rIkb3QoCGSvqB+7XmSIbushAa/Y4lk=\", \"HTTPStatusCode\": 200, \"HTTPHeaders\": {\"x-amz-id-2\": \"27vponPWARCwzke+YUnjm9EfqPAdMr2SiG+Gg0yuruQp4rIkb3QoCGSvqB+7XmSIbushAa/Y4lk=\", \"x-amz-request-id\": \"JEF5YAR1QKK3HW0V\", \"date\": \"Wed, 11 Mar 2026 09:38:10 GMT\", \"content-length\": \"0\", \"server\": \"AmazonS3\"}, \"RetryAttempts\": 0}}"},"metadata":{"service":"s3","service_full_name":"Amazon Simple Storage Service","operation":"PutBucketWebsite","region_name":"us-east-1"},"failed_constraints":[]},"isError":false}} { metadata: undefined }
+2026-03-11T09:40:00.562Z [aws-mcp] [info] Message from client: {"method":"tools/call","params":{"name":"aws___call_aws","arguments":{"cli_command":"aws iam get-user --region us-east-1"}},"jsonrpc":"2.0","id":18} { metadata: undefined }
+2026-03-11T09:40:04.468Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":18,"result":{"content":[{"type":"text","text":"{\"response\":{\"error\":\"An error occurred (AccessDenied) when calling the GetUser operation: User: arn:aws:iam::982393866445:user/MCP-Robot is not authorized to perform: iam:GetUser on resource: user MCP-Robot because no identity-based policy allows the iam:GetUser action\",\"status_code\":403,\"error_code\":\"AccessDenied\",\"pagination_token\":null,\"json\":null},\"metadata\":{\"service\":\"iam\",\"service_full_name\":\"AWS Identity and Access Management\",\"operation\":\"GetUser\",\"region_name\":\"us-east-1\"},\"validation_failures\":null,\"missing_context_failures\":null,\"failed_constraints\":[]}"}],"structuredContent":{"response":{"error":"An error occurred (AccessDenied) when calling the GetUser operation: User: arn:aws:iam::982393866445:user/MCP-Robot is not authorized to perform: iam:GetUser on resource: user MCP-Robot because no identity-based policy allows the iam:GetUser action","status_code":403,"error_code":"AccessDenied"},"metadata":{"service":"iam","service_full_name":"AWS Identity and Access Management","operation":"GetUser","region_name":"us-east-1"},"failed_constraints":[]},"isError":false}} { metadata: undefined }
+2026-03-11T09:40:24.590Z [aws-mcp] [info] Message from client: {"method":"tools/call","params":{"name":"aws___call_aws","arguments":{"cli_command":"aws cloudformation create-stack --stack-name seed-robotics-bucket --region us-east-1 --capabilities CAPABILITY_IAM --template-body '{\n  \"AWSTemplateFormatVersion\": \"20...[2915 chars truncated]...     }\n      }\n    },\n    \"SeedTrigger\": {\n      \"Type\": \"AWS::CloudFormation::CustomResource\",\n      \"Properties\": {\n        \"ServiceToken\": {\"Fn::GetAtt\": [\"SeedFunction\", \"Arn\"]}\n      }\n    }\n  }\n}'"}},"jsonrpc":"2.0","id":19} { metadata: undefined }
+[03/11/26 10:40:27] Error calling tool 'aws___call_aws'                        
+                    +----------- Traceback (most recent call last) -----------+
+                    | C:\Users\nour.ben-saadi\AppData\Local\uv\cache\archive- |
+                    | v0\vKmby1EGhDODOUg417iOL\Lib\site-packages\fastmcp\tool |
+                    | s\tool_manager.py:160 in call_tool                      |
+                    |                                                         |
+                    | C:\Users\nour.ben-saadi\AppData\Local\uv\cache\archive- |
+                    | v0\vKmby1EGhDODOUg417iOL\Lib\site-packages\fastmcp\serv |
+                    | er\proxy.py:319 in run                                  |
+                    +---------------------------------------------------------+
+                    ToolError: Long running commands such as cloudformation    
+                    create-stack not supported at this time.                   
+2026-03-11T09:40:27.429Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":19,"result":{"content":[{"type":"text","text":"Long running commands such as cloudformation create-stack not supported at this time."}],"isError":true}} { metadata: undefined }
+2026-03-11T09:41:44.359Z [aws-mcp] [info] Message from client: {"method":"tools/call","params":{"name":"aws___call_aws","arguments":{"cli_command":"aws s3api list-buckets --region us-east-1"}},"jsonrpc":"2.0","id":20} { metadata: undefined }
+2026-03-11T09:41:47.542Z [aws-mcp] [info] Message from server: {"jsonrpc":"2.0","id":20,"result":{"content":[{"type":"text","text":"{\"response\":{\"error\":null,\"status_code\":200,\"error_code\":null,\"pagination_token\":null,\"json\":\"{\\\"Buckets\\\": [{\\\"Name\\\": \\\"ai-marathon-robot-data-nour\\\", \\\"Creat...[2273 chars truncated]...sfer-encoding\": \"chunked\", \"server\": \"AmazonS3\"}, \"RetryAttempts\": 0}}"},"metadata":{"service":"s3","service_full_name":"Amazon Simple Storage Service","operation":"ListBuckets","region_name":"us-east-1"},"failed_constraints":[]},"isError":false}} { metadata: undefined }

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Era 1: Blind Brain</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        body { background: #05060b; color: white; font-family: 'JetBrains Mono', monospace; margin: 0; overflow: hidden; }
+        
+        #presentation-wrapper {
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding: 1.5rem;
+        }
+
+        .glow-box { border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(10, 15, 25, 0.8); backdrop-filter: blur(15px); }
+        
+        .brain-core {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(157, 0, 255, 0.15) 0%, transparent 80%);
+            border: 1px solid rgba(157, 0, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 1s;
+        }
+
+        .neural-node {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #9d00ff;
+            border-radius: 50%;
+            filter: blur(1px);
+            animation: neural-pulse 4s infinite ease-in-out;
+        }
+
+        @keyframes neural-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.2; }
+            50% { transform: scale(2.5); opacity: 0.7; box-shadow: 0 0 10px #9d00ff; }
+        }
+
+        .blindness-note {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            background: rgba(255, 62, 62, 0.2);
+            border: 1px solid rgba(255, 62, 62, 0.5);
+            color: #ff3e3e;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 20px rgba(255, 62, 62, 0.2);
+        }
+
+        #user-console, #ai-console {
+            overflow-y: auto !important;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            scroll-behavior: smooth;
+            padding-bottom: 20px;
+        }
+        #user-console::-webkit-scrollbar, #ai-console::-webkit-scrollbar { display: none; }
+
+        .chat-bubble {
+            max-width: 95%;
+            padding: 1rem;
+            border-radius: 1.25rem;
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+            opacity: 0;
+            display: none;
+            transform: translateY(15px);
+            transition: all 0.4s;
+            line-height: 1.4;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .chat-bubble.visible { opacity: 1; display: block; transform: translateY(0); }
+        .user-msg { background: rgba(0, 242, 255, 0.08); border-left: 4px solid #00f2ff; align-self: flex-start; width: 92%; }
+        .ai-msg { background: rgba(157, 0, 255, 0.08); border-right: 4px solid #9d00ff; align-self: flex-end; text-align: right; width: 92%; }
+
+        .code-snippet { 
+            background: rgba(0,0,0,0.6); 
+            padding: 10px; 
+            border-radius: 8px; 
+            display: block; 
+            margin-top: 8px; 
+            font-size: 0.75rem; 
+            color: #a5f3fc; 
+            text-align: left; 
+            border: 1px solid rgba(255,255,255,0.15);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .app-tile {
+            width: 100px;
+            height: 70px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.02);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.3s;
+            opacity: 0.25;
+        }
+        .app-tile.active { opacity: 1; border-color: #00f2ff; background: rgba(0, 242, 255, 0.1); box-shadow: 0 0 25px rgba(0, 242, 255, 0.3); transform: scale(1.05); }
+        .app-tile span { font-size: 8px; font-weight: bold; text-transform: uppercase; color: #888fb0; }
+        .app-tile svg { width: 24px; height: 24px; }
+
+        .manual-carrier {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            width: 30px;
+            height: 30px;
+            background: #ffab00;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(255, 171, 0, 0.5);
+        }
+
+        @keyframes carry-to-reality {
+            0% { left: 75%; opacity: 0; transform: scale(0.7); }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { left: 25%; opacity: 0; transform: scale(0.7); }
+        }
+
+        @keyframes carry-to-llm {
+            0% { left: 25%; opacity: 0; transform: scale(0.7); }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { left: 75%; opacity: 0; transform: scale(0.7); }
+        }
+
+        .view-to-reality .manual-carrier { animation: carry-to-reality 1.4s infinite linear; }
+        .view-to-llm .manual-carrier { animation: carry-to-llm 1.4s infinite linear; }
+
+        .isolation-wall {
+            width: 2px;
+            height: 50%;
+            background: linear-gradient(to bottom, transparent, #ff3e3e, #ff3e3e, transparent);
+            position: absolute;
+            left: 50%;
+            top: 25%;
+            transform: translateX(-50%);
+            opacity: 0.3;
+        }
+
+        .kbd-guide { font-size: 10px; background: #1a1c23; border: 1px solid #334155; padding: 4px 8px; border-radius: 4px; color: #94a3b8; font-weight: bold; }
+        
+        #conclusion-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 90%;
+            max-width: 900px;
+            background: rgba(10, 15, 25, 0.98);
+            border: 2px solid #ff3e3e;
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 500;
+            box-shadow: 0 0 100px rgba(255, 62, 62, 0.2);
+        }
+        #conclusion-box.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="presentation-wrapper">
+        <!-- Header -->
+        <div class="flex justify-between items-start mb-4 relative z-20 shrink-0">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tighter text-violet-400 uppercase">THE BLIND BRAIN ERA</h1>
+                <p class="text-slate-400 text-xs mt-1 tracking-widest uppercase italic font-bold">Manual Brokerage & Functional Isolation</p>
+            </div>
+            <div class="flex gap-3 items-center bg-black/60 px-5 py-2.5 rounded-full border border-white/5 shadow-2xl">
+                <span class="kbd-guide">←</span>
+                <span class="kbd-guide">→</span>
+                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-widest ml-1">Manual Interaction</span>
+            </div>
+        </div>
+
+        <div class="flex-1 grid grid-cols-2 gap-12 items-center relative min-h-0 overflow-hidden">
+            <div class="isolation-wall"></div>
+            
+            <div class="manual-carrier" id="carrier">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+            </div>
+
+            <!-- Left Side: User Context & Actions -->
+            <div class="flex flex-col items-center space-y-6 h-full justify-start overflow-hidden pt-2">
+                <div class="grid grid-cols-4 gap-2 shrink-0">
+                    <div id="app-aws" class="app-tile">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8V21H3V8"/><path d="M1 3h22v5H1z"/></svg>
+                        <span>AWS CLI</span>
+                    </div>
+                    <div id="app-gitlab" class="app-tile">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 13-10 9-10-9V6l10-4 10 4v7Z"/></svg>
+                        <span>GitLab</span>
+                    </div>
+                    <div id="app-browser" class="app-tile">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7"/><path d="m22 22-5-5"/><circle cx="15" cy="15" r="3"/></svg>
+                        <span>Browser</span>
+                    </div>
+                    <div id="app-email" class="app-tile">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-11 11"/><path d="M22 2-7 20-4-9-9-4Z"/></svg>
+                        <span>SMTP</span>
+                    </div>
+                </div>
+
+                <div class="glow-box p-4 rounded-xl border-cyan-500/20 w-full max-w-sm space-y-2 shrink-0">
+                    <div class="text-[9px] text-cyan-400 font-bold uppercase tracking-widest flex justify-between">
+                        <span>External Reality</span>
+                        <span id="term-status" class="animate-pulse">● AWAITING ACTION</span>
+                    </div>
+                    <div id="terminal-content" class="text-[10px] font-mono text-slate-400 leading-tight min-h-[40px]">
+                        $ _
+                    </div>
+                </div>
+
+                <div id="user-console" class="w-full flex-1 flex flex-col items-start pr-2">
+                    <div id="u-1" class="chat-bubble user-msg">"My robot data is in the <b>my-robotics-data-2026</b> AWS bucket. I need to find the last position of Alpha on Jan 8th. Can you help me investigate?"</div>
+                    <div id="u-2" class="chat-bubble user-msg font-bold text-red-400 border-l-4 border-red-500">"Error: robot_gps.csv not found in s3://my-robotics-data-2026/. 404 in terminal."</div>
+                    <div id="u-3" class="chat-bubble user-msg font-mono text-[9px] bg-cyan-400/5">[User Pasted: Output of `aws s3 ls my-robotics-data-2026 --recursive`]</div>
+                    <div id="u-4" class="chat-bubble user-msg font-mono text-[9px] bg-cyan-400/5">[User Pasted Content: alpha/gps/20250108.json]</div>
+                    <div id="u-5" class="chat-bubble user-msg font-bold text-cyan-400">"Alpha position is Jan 8th 02:30:00Z. Let's check for an image close to that timestamp from Alpha or a robot nearby and get its presigned URL."</div>
+                    <div id="u-6" class="chat-bubble user-msg">"Ran script. Generated Bravo URL. Results: Heat detected. News: 'California Wildfire outbreak'. Weather: 'High Winds'. Can you write the summary email?"</div>
+                    <div id="u-7" class="chat-bubble user-msg font-mono italic text-slate-500">[User manually copy-pastes report into Outlook and clicks SEND]</div>
+                </div>
+            </div>
+
+            <!-- Right Side: LLM Brain -->
+            <div class="flex flex-col items-center space-y-6 h-full justify-start overflow-hidden pt-2">
+                <div class="brain-core shrink-0">
+                    <div class="blindness-note">System Note: LLM is Blind</div>
+                    <div id="brain-nodes-container"></div>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9d00ff" stroke-width="1.5"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"/></svg>
+                </div>
+
+                <div id="ai-console" class="w-full flex-1 flex flex-col items-end pl-2">
+                    <div id="a-1" class="chat-bubble ai-msg">"Certainly. To start, let's look for the logs. Run this in your terminal:<br><span class="code-snippet">aws s3 cp s3://my-robotics-data-2026/robot_gps.csv .</span>"</div>
+                    <div id="a-2" class="chat-bubble ai-msg">"Apologies. I am blind to the environment. Please run `aws s3 ls my-robotics-data-2026 --recursive` so I can see the actual file structure."</div>
+                    <div id="a-3" class="chat-bubble ai-msg">"I see. Alpha uses JSON. Download `alpha/gps/20250108.json` and paste its content so I can find the precise timestamp."</div>
+                    <div id="a-4" class="chat-bubble ai-msg">"Last position: Jan 8th 02:30:00Z. Alpha's logs contain no image references here."</div>
+                    <div id="a-5" class="chat-bubble ai-msg">"Aha! I remember the list: `bravo/metadata/0230Z`. Alpha has no image, but Bravo does. Check if Bravo's 02:30Z position was close. If so, use this command to generate a presigned URL."</div>
+                    <div id="a-6" class="chat-bubble ai-msg">"Drafting email: 'Mission Intel Jan 8th 02:30Z: Robot Alpha located near active California Wildfire. High winds noted. Bravo ML confirms smoke signatures.' Please manually paste this to send."</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="footer-caption" class="h-10 flex items-center justify-center border-t border-white/5 text-slate-500 text-[10px] font-bold tracking-[0.2em] uppercase italic shrink-0">
+            Current Investigation: The Manual Marathon
+        </div>
+    </div>
+
+    <!-- Architectural Conclusion Overlay -->
+    <div id="conclusion-box">
+        <div class="text-red-500 font-bold uppercase tracking-[0.5em] text-xs mb-4">Final Architecture Review</div>
+        <p class="text-white text-3xl font-bold leading-tight mb-6">
+            The User is the <span class="text-cyan-400 underline decoration-cyan-400/30 underline-offset-8">Actor</span>.
+        </p>
+        <p class="text-slate-400 text-xl leading-relaxed">
+            The LLM is blind. It cannot see the context. It cannot use the limbs, the apps, or the services.
+        </p>
+        <div class="mt-10 py-6 border-t border-white/10">
+            <span class="text-red-400 italic text-2xl font-serif">"It can just talk."</span>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('brain-nodes-container');
+        for(let i=0; i<25; i++) {
+            const n = document.createElement('div');
+            n.className = 'neural-node';
+            n.style.left = Math.random() * 100 + '%';
+            n.style.top = Math.random() * 100 + '%';
+            n.style.animationDelay = Math.random() * 4 + 's';
+            container.appendChild(n);
+        }
+
+        let currentStep = 0;
+        const totalSteps = 12; 
+        const wrapper = document.getElementById('presentation-wrapper');
+        const caption = document.getElementById('footer-caption');
+        const term = document.getElementById('terminal-content');
+        const tStat = document.getElementById('term-status');
+        const userConsole = document.getElementById('user-console');
+        const aiConsole = document.getElementById('ai-console');
+        const conclusion = document.getElementById('conclusion-box');
+
+        function scrollToBottom() {
+            userConsole.scrollTo({ top: userConsole.scrollHeight, behavior: 'smooth' });
+            aiConsole.scrollTo({ top: aiConsole.scrollHeight, behavior: 'smooth' });
+        }
+
+        function updatePresentation() {
+            wrapper.style.opacity = '1';
+            wrapper.className = '';
+            document.querySelectorAll('.chat-bubble').forEach(b => b.classList.remove('visible'));
+            document.querySelectorAll('.app-tile').forEach(a => a.classList.remove('active'));
+            conclusion.classList.remove('visible');
+            term.innerHTML = "$ _"; tStat.innerText = "● AWAITING ACTION"; tStat.className = "animate-pulse";
+
+            if (currentStep >= 1) {
+                document.getElementById('u-1').classList.add('visible');
+                document.getElementById('a-1').classList.add('visible');
+                caption.innerText = "Initiation: LLM guesses non-existent format.";
+            }
+            if (currentStep === 2) {
+                wrapper.classList.add('view-to-reality');
+                term.innerHTML = "$ aws s3 cp s3://my-robotics-data-2026/robot_gps.csv .<br><span class='text-red-500 font-bold'>fatal error: 404 Not Found</span>";
+                tStat.innerText = "● ERROR"; tStat.className = "text-red-500 font-bold";
+                document.getElementById('app-aws').classList.add('active');
+                caption.innerText = "Execution: User discovers the Blindness via terminal error.";
+            }
+            if (currentStep === 3) {
+                wrapper.classList.add('view-to-llm');
+                document.getElementById('u-2').classList.add('visible');
+                document.getElementById('a-2').classList.add('visible');
+                caption.innerText = "Correction: Human provides reality check to the Brain.";
+            }
+            if (currentStep === 4) {
+                wrapper.classList.add('view-to-reality');
+                term.innerHTML = "$ aws s3 ls my-robotics-data-2026 --recursive<br>...alpha/gps/20250108.json<br>...bravo/metadata/0230Z";
+                document.getElementById('app-aws').classList.add('active');
+                caption.innerText = "Discovery: Manual listing to provide 'Eyes' to the LLM.";
+            }
+            if (currentStep === 5) {
+                wrapper.classList.add('view-to-llm');
+                document.getElementById('u-3').classList.add('visible');
+                document.getElementById('a-3').classList.add('visible');
+                caption.innerText = "Sync: User pastes structure back to the isolated LLM.";
+            }
+            if (currentStep === 6) {
+                wrapper.classList.add('view-to-reality');
+                term.innerHTML = "$ aws s3 cp s3://.../alpha/gps/20250108.json .<br>$ cat 20250108.json<br>{'ts': '02:30:00Z', 'lat': 36.77}";
+                document.getElementById('app-aws').classList.add('active');
+                caption.innerText = "Probe: User inspects file internals for the LLM.";
+            }
+            if (currentStep === 7) {
+                wrapper.classList.add('view-to-llm');
+                document.getElementById('u-4').classList.add('visible');
+                document.getElementById('a-4').classList.add('visible');
+                caption.innerText = "Dead End: LLM sees 02:30Z but sees no Alpha image.";
+            }
+            if (currentStep === 8) {
+                document.getElementById('u-4').classList.add('visible');
+                document.getElementById('a-4').classList.add('visible');
+                document.getElementById('u-5').classList.add('visible');
+                caption.innerText = "Human Memory: User recalls Bravo detail and leads the pivot.";
+            }
+            if (currentStep === 9) {
+                wrapper.classList.add('view-to-reality');
+                document.getElementById('a-5').classList.add('visible');
+                document.getElementById('u-5').classList.add('visible');
+                document.getElementById('app-aws').classList.add('active');
+                document.getElementById('app-gitlab').classList.add('active');
+                document.getElementById('app-browser').classList.add('active');
+                term.innerHTML = "$ aws s3 presign s3://.../bravo_0230.jpg<br>$ check news: Wildfire<br>$ check weather: Winds";
+                caption.innerText = "The Marathon: Human bridges 3 silos manually.";
+            }
+            if (currentStep === 10) {
+                wrapper.classList.add('view-to-llm');
+                document.getElementById('u-6').classList.add('visible');
+                document.getElementById('a-6').classList.add('visible');
+                caption.innerText = "Synthesis: User returns real-world data to the LLM.";
+            }
+            if (currentStep === 11) {
+                wrapper.classList.add('view-to-reality');
+                document.getElementById('app-email').classList.add('active');
+                document.getElementById('u-7').classList.add('visible');
+                term.innerHTML = "[Pasting Report: Mission Intel Jan 8th 02:30Z Summary...]";
+                caption.innerText = "Dispatch: Final action is manual copy-paste.";
+            }
+            if (currentStep === 12) {
+                conclusion.classList.add('visible');
+                wrapper.style.opacity = '0.05';
+                caption.innerText = "Final Conclusion: The Agency Gap";
+            }
+
+            setTimeout(scrollToBottom, 50);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') { 
+                currentStep = (currentStep + 1 > totalSteps) ? 0 : currentStep + 1; 
+                updatePresentation(); 
+            }
+            if (e.key === 'ArrowLeft') { 
+                currentStep = (currentStep - 1 < 0) ? totalSteps : currentStep - 1; 
+                updatePresentation(); 
+            }
+        });
+
+        updatePresentation(); 
+    </script>
+</body>
+</html>
