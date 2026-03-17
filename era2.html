@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Era 2: The Tool Maker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        body { background: #05060b; color: white; font-family: 'JetBrains Mono', monospace; margin: 0; overflow: hidden; }
+        
+        #presentation-wrapper {
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding: 1.5rem;
+        }
+
+        .glow-box { border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(10, 15, 25, 0.8); backdrop-filter: blur(15px); }
+        
+        .brain-core {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(157, 0, 255, 0.15) 0%, transparent 80%);
+            border: 1px solid rgba(157, 0, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 1s;
+        }
+
+        .neural-node {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #9d00ff;
+            border-radius: 50%;
+            filter: blur(1px);
+            animation: neural-pulse 4s infinite ease-in-out;
+        }
+
+        @keyframes neural-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.2; }
+            50% { transform: scale(2.5); opacity: 0.7; box-shadow: 0 0 8px #9d00ff; }
+        }
+
+        .blindness-note {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            background: rgba(255, 171, 0, 0.15);
+            border: 1px solid rgba(255, 171, 0, 0.4);
+            color: #ffab00;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 20px rgba(255, 171, 0, 0.1);
+        }
+
+        #user-console, #ai-console {
+            overflow-y: auto !important;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            scroll-behavior: smooth;
+            padding-bottom: 60px;
+        }
+        #user-console::-webkit-scrollbar, #ai-console::-webkit-scrollbar { display: none; }
+
+        .chat-bubble {
+            max-width: 95%;
+            padding: 1rem;
+            border-radius: 1.25rem;
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+            opacity: 0;
+            display: none;
+            transform: translateY(15px);
+            transition: all 0.4s;
+            line-height: 1.4;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .chat-bubble.visible { opacity: 1; display: block; transform: translateY(0); }
+        .user-msg { background: rgba(0, 242, 255, 0.08); border-left: 4px solid #00f2ff; align-self: flex-start; width: 92%; }
+        .ai-msg { background: rgba(157, 0, 255, 0.08); border-right: 4px solid #9d00ff; align-self: flex-end; text-align: right; width: 92%; }
+
+        .code-snippet { 
+            background: rgba(0,0,0,0.7); 
+            padding: 12px; 
+            border-radius: 8px; 
+            display: block; 
+            margin-top: 8px; 
+            font-size: 0.7rem; 
+            color: #a5f3fc; 
+            text-align: left; 
+            border: 1px solid rgba(255,255,255,0.15);
+            font-family: 'JetBrains Mono', monospace;
+            position: relative;
+        }
+
+        .app-tile {
+            width: 100px;
+            height: 65px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.02);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.3s;
+            opacity: 0.25;
+        }
+        .app-tile.active { opacity: 1; border-color: #00f2ff; background: rgba(0, 242, 255, 0.1); box-shadow: 0 0 25px rgba(0, 242, 255, 0.3); transform: scale(1.05); }
+        .app-tile span { font-size: 8px; font-weight: bold; text-transform: uppercase; color: #888fb0; }
+        .app-tile svg { width: 24px; height: 24px; }
+
+        .manual-carrier {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            width: 34px;
+            height: 34px;
+            background: #ffab00;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(255, 171, 0, 0.5);
+        }
+
+        @keyframes carry-to-reality {
+            0% { left: 75%; opacity: 0; transform: scale(0.7); }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { left: 25%; opacity: 0; transform: scale(0.7); }
+        }
+
+        @keyframes carry-to-llm {
+            0% { left: 25%; opacity: 0; transform: scale(0.7); }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { left: 75%; opacity: 0; transform: scale(0.7); }
+        }
+
+        .view-to-reality .manual-carrier { animation: carry-to-reality 1.4s infinite linear; }
+        .view-to-llm .manual-carrier { animation: carry-to-llm 1.4s infinite linear; }
+
+        .isolation-wall {
+            width: 2px;
+            height: 50%;
+            background: linear-gradient(to bottom, transparent, #ffab00, #ffab00, transparent);
+            position: absolute;
+            left: 50%;
+            top: 25%;
+            transform: translateX(-50%);
+            opacity: 0.3;
+        }
+
+        .kbd-guide { font-size: 10px; background: #1a1c23; border: 1px solid #334155; padding: 4px 8px; border-radius: 4px; color: #94a3b8; font-weight: bold; }
+        
+        #conclusion-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 90%;
+            max-width: 900px;
+            background: rgba(10, 15, 25, 0.98);
+            border: 2px solid #ffab00;
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 500;
+            box-shadow: 0 0 120px rgba(255, 171, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        #conclusion-box.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="presentation-wrapper">
+        <div class="flex justify-between items-start mb-4 relative z-20 shrink-0">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tighter text-amber-400 uppercase italic">THE TOOL MAKER ERA</h1>
+                <p class="text-slate-400 text-xs mt-1 tracking-widest uppercase italic font-bold">Hardcoded Heterogeneity • Brittle Automation</p>
+            </div>
+            <div class="flex gap-3 items-center bg-black/60 px-5 py-2.5 rounded-full border border-white/5 shadow-2xl">
+                <span class="kbd-guide">←</span>
+                <span class="kbd-guide">→</span>
+                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-widest ml-1">Iterative Scripting</span>
+            </div>
+        </div>
+
+        <div class="flex-1 grid grid-cols-2 gap-12 items-center relative min-h-0 overflow-hidden">
+            <div class="isolation-wall"></div>
+            
+            <div class="manual-carrier" id="carrier">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+            </div>
+
+            <!-- Left Side: User Reality -->
+            <div class="flex flex-col items-center space-y-4 h-full justify-start overflow-hidden pt-2">
+                <div class="grid grid-cols-4 gap-2 shrink-0">
+                    <div id="app-aws" class="app-tile">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8V21H3V8"/><path d="M1 3h22v5H1z"/></svg>
+                        <span>AWS S3</span>
+                    </div>
+                    <div id="app-gitlab" class="app-tile">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 13-10 9-10-9V6l10-4 10 4v7Z"/></svg>
+                        <span>GitLab</span>
+                    </div>
+                    <div id="app-browser" class="app-tile">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7"/><path d="m22 22-5-5"/><circle cx="15" cy="15" r="3"/></svg>
+                        <span>Browser</span>
+                    </div>
+                    <div id="app-email" class="app-tile">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-11 11"/><path d="M22 2-7 20-4-9-9-4Z"/></svg>
+                        <span>SMTP</span>
+                    </div>
+                </div>
+
+                <div class="glow-box p-4 rounded-xl border-amber-500/20 w-full max-w-sm space-y-2 shrink-0">
+                    <div class="text-[9px] text-amber-400 font-bold uppercase tracking-widest flex justify-between">
+                        <span>Terminal Execution</span>
+                        <span id="term-status" class="animate-pulse">● READY</span>
+                    </div>
+                    <div id="terminal-content" class="text-[10px] font-mono text-slate-400 leading-tight min-h-[40px]">
+                        $ _
+                    </div>
+                </div>
+
+                <div id="user-console" class="w-full flex-1 flex flex-col items-start pr-2">
+                    <div id="u-1" class="chat-bubble user-msg">"Data is in <b>my-robotics-data-2026</b>. Write a master boto3 script that handles Alpha (JSON body) and Bravo (S3 headers) to automate the detection."</div>
+                    <div id="u-2" class="chat-bubble user-msg font-mono text-[9px] bg-cyan-400/5">[User Pasted: Output of `aws s3 ls --recursive`]</div>
+                    <div id="u-3" class="chat-bubble user-msg font-bold text-green-400">"Master script works! It processed Alpha 02:30Z and pivoted to Bravo's headers automatically. Full report generated."</div>
+                    <div id="u-4" class="chat-bubble user-msg font-bold text-red-400 border-l-4 border-red-500">"The script crashed! production just changed Bravo's format to use 'S3 Tags' instead of 'Headers'. The hardcoded `head_object` logic is now useless."</div>
+                    <div id="u-5" class="chat-bubble user-msg font-mono italic text-slate-500">"Back to square one. Carrying the new Bravo tag structure back to the LLM for a complete script rewrite."</div>
+                </div>
+            </div>
+
+            <!-- Right Side: LLM (The Tool Maker) -->
+            <div class="flex flex-col items-center space-y-6 h-full justify-start overflow-hidden pt-2">
+                <div class="brain-core shrink-0">
+                    <div class="blindness-note">Status: Frozen Context</div>
+                    <div id="brain-nodes-container"></div>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ffab00" stroke-width="1.5"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"/><circle cx="12" cy="12" r="3"></circle></svg>
+                </div>
+
+                <div id="ai-console" class="w-full flex-1 flex flex-col items-end pl-2">
+                    <div id="a-1" class="chat-bubble ai-msg">"Certainly. I will generate a heterogeneous master script. Please provide the directory list first so I can map the disparate data formats."</div>
+                    <div id="a-2" class="chat-bubble ai-msg">"Mapping complete. I have built a multi-logic tool: logic for Alpha's body fields and logic for Bravo's headers.<br>
+                        <span class="code-snippet"># Master Logic Snapshot<br>if 'alpha' in key: data = get_json_body(key)<br>elif 'bravo' in key: data = s3.head_object(key)['Metadata']</span>"
+                    </div>
+                    <div id="a-3" class="chat-bubble ai-msg">"I'm sorry to hear that. I have no dynamic awareness of your production environment. Please paste the new Tag structure and I will rewrite the entire script for you."</div>
+                    <div id="a-4" class="chat-bubble ai-msg italic opacity-50">"Automation is brittle. Every production schema change requires a manual handshake to update the logic snapshot."</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="footer-caption" class="h-10 flex items-center justify-center border-t border-white/5 text-slate-500 text-[10px] font-bold tracking-[0.2em] uppercase italic shrink-0">
+            Era Status: Manual Revision of Heterogeneous Scripts
+        </div>
+    </div>
+
+    <!-- Conclusion Overlay -->
+    <div id="conclusion-box">
+        <div class="text-amber-500 font-bold uppercase tracking-[0.5em] text-xs mb-4">Architectural Review: Era 2</div>
+        <p class="text-white text-3xl font-bold leading-tight mb-6">
+            Automation is not <span class="text-amber-400 underline decoration-amber-400/30 underline-offset-8">Agency</span>.
+        </p>
+        <p class="text-slate-400 text-xl leading-relaxed px-10">
+            A script is a <b>frozen logic snapshot</b>. Maintenance scales linearly with environment failure. If one production format shifts, the whole automation chain breaks.
+        </p>
+        <div class="mt-10 py-6 border-t border-white/10">
+            <span class="text-amber-400 italic text-2xl font-serif">"The user is carrying the code snapshots, not the intent."</span>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('brain-nodes-container');
+        for(let i=0; i<25; i++) {
+            const n = document.createElement('div');
+            n.className = 'neural-node';
+            n.style.left = Math.random() * 100 + '%';
+            n.style.top = Math.random() * 100 + '%';
+            n.style.animationDelay = Math.random() * 4 + 's';
+            n.style.backgroundColor = '#ffab00';
+            container.appendChild(n);
+        }
+
+        let currentStep = 0;
+        const totalSteps = 10; 
+        const wrapper = document.getElementById('presentation-wrapper');
+        const caption = document.getElementById('footer-caption');
+        const term = document.getElementById('terminal-content');
+        const tStat = document.getElementById('term-status');
+        const userConsole = document.getElementById('user-console');
+        const aiConsole = document.getElementById('ai-console');
+        const conclusion = document.getElementById('conclusion-box');
+
+        function scrollToBottom() {
+            userConsole.scrollTo({ top: userConsole.scrollHeight, behavior: 'smooth' });
+            aiConsole.scrollTo({ top: aiConsole.scrollHeight, behavior: 'smooth' });
+        }
+
+        function updatePresentation() {
+            wrapper.style.opacity = '1';
+            wrapper.className = '';
+            document.querySelectorAll('.chat-bubble').forEach(b => b.classList.remove('visible'));
+            document.querySelectorAll('.app-tile').forEach(a => a.classList.remove('active'));
+            conclusion.classList.remove('visible');
+            term.innerHTML = "$ _"; tStat.innerText = "● READY"; tStat.className = "animate-pulse";
+
+            if (currentStep >= 1) {
+                document.getElementById('u-1').classList.add('visible');
+                document.getElementById('a-1').classList.add('visible');
+                caption.innerText = "Initiation: User requests a Master Script to handle multi-robot heterogeneity.";
+            }
+            if (currentStep === 2) {
+                wrapper.classList.add('view-to-reality');
+                term.innerHTML = "$ aws s3 ls my-robotics-data-2026 --recursive";
+                document.getElementById('app-aws').classList.add('active');
+                caption.innerText = "Discovery: Manual data dump to help the blind AI map the formats.";
+            }
+            if (currentStep === 3) {
+                wrapper.classList.add('view-to-llm');
+                document.getElementById('u-2').classList.add('visible');
+                document.getElementById('a-2').classList.add('visible');
+                caption.innerText = "Sync: AI writes the heterogeneous logic (Body vs Headers).";
+            }
+            if (currentStep === 4) {
+                wrapper.classList.add('view-to-reality');
+                term.innerHTML = "$ vim master_tool.py # Pasting Code<br>$ python3 master_tool.py<br>Processing Alpha... Success.<br>Pivoting to Bravo Headers... Success.";
+                document.getElementById('app-aws').classList.add('active');
+                document.getElementById('app-gitlab').classList.add('active');
+                caption.innerText = "Temporary Success: The hardcoded bridge handles the silos... for now.";
+            }
+            if (currentStep === 5) {
+                wrapper.classList.add('view-to-llm');
+                document.getElementById('u-3').classList.add('visible');
+                caption.innerText = "Moment of Truth: Environment stability assumption.";
+            }
+            if (currentStep === 6) {
+                wrapper.classList.add('view-to-reality');
+                term.innerHTML = "$ python3 master_tool.py<br><span class='text-red-500 font-bold'>KeyError: 'x-amz-meta-lat'</span><br>Bravo data format changed to S3 Tags.";
+                tStat.innerText = "● CRASHED"; tStat.className = "text-red-500 font-bold";
+                document.getElementById('app-aws').classList.add('active');
+                caption.innerText = "The Break: One production change kills the entire automation snapshot.";
+            }
+            if (currentStep === 7) {
+                wrapper.classList.add('view-to-llm');
+                document.getElementById('u-4').classList.add('visible');
+                document.getElementById('a-3').classList.add('visible');
+                caption.innerText = "The Maintenance Trap: User must manually bridge the gap again.";
+            }
+            if (currentStep === 8) {
+                wrapper.classList.add('view-to-reality');
+                term.innerHTML = "$ aws s3api get-object-tagging --bucket ... --key bravo/...";
+                document.getElementById('app-aws').classList.add('active');
+                caption.innerText = "Manual Probe: Extracting new tag schema to update the script.";
+            }
+            if (currentStep === 9) {
+                wrapper.classList.add('view-to-llm');
+                document.getElementById('u-5').classList.add('visible');
+                document.getElementById('a-4').classList.add('visible');
+                caption.innerText = "The Realization: You are managing code, not delegating task intent.";
+            }
+            if (currentStep === 10) {
+                conclusion.classList.add('visible');
+                wrapper.style.opacity = '0.2';
+                caption.innerText = "Era 2 Conclusion: Brittle Automation";
+            }
+
+            setTimeout(scrollToBottom, 50);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') { currentStep = (currentStep + 1 > totalSteps) ? 0 : currentStep + 1; updatePresentation(); }
+            if (e.key === 'ArrowLeft') { currentStep = (currentStep - 1 < 0) ? totalSteps : currentStep - 1; updatePresentation(); }
+        });
+
+        updatePresentation(); 
+    </script>
+</body>
+</html>

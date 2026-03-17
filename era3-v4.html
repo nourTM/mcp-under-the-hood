@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Era 3: Hardcoded Silos - The Token Graveyard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
+        body {
+            background: #05060b;
+            color: white;
+            font-family: 'JetBrains Mono', monospace;
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* CONSISTENT SCROLLBAR STYLING */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+
+        #presentation-wrapper {
+            height: 100vh; width: 100vw; display: flex; flex-direction: column;
+            position: relative; padding: 1rem; box-sizing: border-box;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #main-workspace {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem; align-items: center; flex: 1; min-height: 0;
+            transition: filter 0.6s ease, opacity 0.6s ease;
+        }
+
+        /* Selective blur logic */
+        .blur-active #wires-layer,
+        .blur-active header,
+        .blur-active .floating-label,
+        .blur-active #footer-caption,
+        .blur-active #main-workspace > :not(.prompt-column) {
+            filter: blur(15px) brightness(0.2);
+            pointer-events: none;
+        }
+
+        .blur-active .prompt-column > :not(.prompt-zone) { filter: blur(15px) brightness(0.2); pointer-events: none; }
+        .blur-active .prompt-zone > :not(.context-container.zoomed) { filter: blur(15px) brightness(0.2); pointer-events: none; }
+
+        .brain-core {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(157, 0, 255, 0.15) 0%, transparent 80%);
+            border: 1px solid rgba(157, 0, 255, 0.3);
+            display: flex; align-items: center; justify-content: center;
+            position: relative; flex-shrink: 0; z-index: 20;
+        }
+
+        .neural-node {
+            position: absolute; width: 3px; height: 3px; background: #9d00ff;
+            border-radius: 50%; filter: blur(1px); animation: neural-pulse 4s infinite ease-in-out;
+        }
+
+        @keyframes neural-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.2; }
+            50% { transform: scale(2.5); opacity: 0.7; box-shadow: 0 0 10px #9d00ff; }
+        }
+
+        .wrapper-hub {
+            width: 220px; height: 250px; border: 4px solid #9d00ff;
+            background: rgba(157, 0, 255, 0.1); border-radius: 30px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: relative; z-index: 50; box-shadow: 0 0 60px rgba(157, 0, 255, 0.2);
+        }
+
+        /* CONTEXT BLOCKS */
+        .context-container {
+            display: flex; flex-direction: column; gap: 10px; width: 100%;
+            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .system-prompt-block, .history-block {
+            background: rgba(10, 5, 5, 0.95);
+            border: 2px solid #f43f5e; border-radius: 12px;
+            padding: 15px; font-size: 8px; color: #f43f5e;
+            max-height: 120px; overflow: hidden; position: relative;
+            line-height: 1.3; width: 100%; box-sizing: border-box;
+            box-shadow: 0 0 30px rgba(244, 63, 94, 0.2); z-index: 20;
+        }
+
+        .history-block { border-color: #9d00ff; color: #d8b4fe; overflow-y: auto; }
+
+        /* HERO ZOOM STATE */
+        .context-container.zoomed {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 1100px; max-height: 85vh; z-index: 5000;
+            flex-direction: row; gap: 30px;
+            pointer-events: auto; filter: none !important; opacity: 1 !important;
+        }
+
+        .context-container.zoomed .system-prompt-block {
+            flex: 2; /* Zoom only the tool list (system prompt) more aggressively */
+            max-height: 75vh; padding: 40px; font-size: 14px;
+            box-shadow: 0 0 400px rgba(244, 63, 94, 0.2); overflow-y: auto;
+        }
+
+        .context-container.zoomed .history-block {
+            flex: 1; max-height: 75vh; padding: 30px; font-size: 12px;
+            background: rgba(10, 5, 5, 0.8); overflow-y: auto;
+        }
+
+        .context-container.zoomed span { font-size: 14px !important; line-height: 1.6; }
+
+        .block-label {
+            position: absolute; top: 10px; right: 20px; font-weight: 900;
+            font-size: 8px; letter-spacing: 2px; text-transform: uppercase;
+        }
+
+        #user-console, #ai-console {
+            overflow-y: auto !important; scroll-behavior: smooth;
+            padding-bottom: 20px; height: 100%;
+        }
+
+        .chat-bubble {
+            max-width: 95%; padding: 1rem; border-radius: 1rem; font-size: 0.85rem;
+            margin-bottom: 1rem; opacity: 0; display: none;
+            transform: translateY(15px); transition: all 0.4s; line-height: 1.4;
+        }
+
+        .chat-bubble.visible { opacity: 1; display: block; transform: translateY(0); }
+        .user-msg { background: rgba(0, 242, 255, 0.1); border-left: 5px solid #00f2ff; color: white; }
+        .ai-msg { background: rgba(157, 0, 255, 0.1); border-right: 5px solid #9d00ff; text-align: right; width: 95%; color: #d8b4fe; }
+
+        .app-tile {
+            width: 120px; height: 55px; border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+            transition: all 0.3s; opacity: 0.15; position: relative;
+        }
+
+        .app-tile.active { 
+            opacity: 1; border-color: #00f2ff; background: rgba(0, 242, 255, 0.15); 
+            transform: scale(1.05); box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+            animation: app-pulse 1s infinite alternate;
+        }
+
+        @keyframes app-pulse { from { border-color: #00f2ff; } to { border-color: #ffffff; } }
+
+        .wiring-svg { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+        .wire { fill: none; stroke: #9d00ff; stroke-width: 2; opacity: 0.05; transition: all 0.5s; }
+        .wire.active { opacity: 0.8; stroke: #00f2ff; stroke-width: 3; filter: drop-shadow(0 0 10px #00f2ff); }
+        
+        .prompt-arc { stroke: #f43f5e; stroke-width: 3; opacity: 0.1; stroke-dasharray: 5; transition: all 0.8s; }
+        .prompt-arc.active {
+            opacity: 1; stroke-dasharray: none; filter: drop-shadow(0 0 12px rgba(244, 63, 94, 0.8));
+        }
+
+        .wire-flow {
+            stroke-dasharray: 10, 20; stroke-dashoffset: 100; animation: flow-data 1s linear infinite;
+            stroke-width: 4; stroke: #00f2ff; opacity: 0; transition: opacity 0.3s;
+        }
+        .wire-flow.active { opacity: 1; }
+        .wire-flow.reverse { animation-direction: reverse; stroke: #9d00ff; }
+
+        @keyframes flow-data { to { stroke-dashoffset: 0; } }
+
+        #json-modal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
+            width: 650px; background: rgba(10, 15, 25, 0.99); border: 2px solid #00f2ff;
+            padding: 40px; border-radius: 32px; z-index: 6000;
+            opacity: 0; visibility: hidden; transition: all 0.4s;
+            box-shadow: 0 0 150px rgba(0, 242, 255, 0.3); backdrop-filter: blur(20px);
+        }
+        #json-modal.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
+
+        .floating-label {
+            position: absolute; background: #f43f5e; color: white; padding: 4px 10px;
+            border-radius: 4px; font-size: 8px; font-weight: 900; text-transform: uppercase;
+            z-index: 100; opacity: 0; transition: opacity 0.5s;
+        }
+        
+        .context-fence {
+            position: absolute; inset: -20px; border: 4px dashed #f43f5e; border-radius: 25px;
+            background: rgba(244, 63, 94, 0.05); pointer-events: none; z-index: 10;
+            opacity: 0; transition: all 0.8s;
+        }
+        .context-fence.active { opacity: 0.8; }
+        
+        #conclusion-box {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
+            width: 92%; max-width: 1000px; background: rgba(10, 15, 25, 0.99);
+            border: 3px solid #9d00ff; padding: 2.5rem; border-radius: 30px;
+            text-align: center; opacity: 0; visibility: hidden;
+            transition: all 0.8s; z-index: 7000; box-shadow: 0 0 200px rgba(157, 0, 255, 0.5);
+        }
+        #conclusion-box.visible { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
+
+        .nm-chaos-mesh {
+            position: absolute; inset: 0; background: rgba(5, 6, 11, 0.98);
+            z-index: 8000; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 1s;
+        }
+        .nm-chaos-mesh.active { opacity: 1; pointer-events: auto; }
+        .kbd-guide { font-size: 10px; background: #1a1c23; border: 1px solid #334155; padding: 4px 8px; border-radius: 4px; color: #94a3b8; font-weight: bold; }
+        .highlight-tax { border: 2px solid #00f2ff; background: rgba(0, 242, 255, 0.1); padding: 6px 12px; border-radius: 8px; color: #00f2ff; font-weight: 900; display: block; margin-top: 10px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <div id="presentation-wrapper">
+        <svg class="wiring-svg" id="wires-layer">
+            <path id="path-aws" class="wire" d="" />
+            <path id="path-gitlab" class="wire" d="" />
+            <path id="path-browser" class="wire" d="" />
+            <path id="path-email" class="wire" d="" />
+            <path id="path-llm" class="wire prompt-arc" d="" />
+            
+            <path id="flow-aws" class="wire-flow" d="" />
+            <path id="flow-gitlab" class="wire-flow" d="" />
+            <path id="flow-browser" class="wire-flow" d="" />
+            <path id="flow-email" class="wire-flow" d="" />
+            <path id="flow-llm" class="wire-flow" style="stroke: #f43f5e;" d="" />
+        </svg>
+
+        <div id="label-suitcase" class="floating-label" style="top: 20%; right: 5%;">THE STUFFED SUITCASE</div>
+        <div id="label-bridge" class="floating-label" style="top: 20%; left: 35%;">HARDCODED TRANSLATION</div>
+
+        <div id="json-modal">
+            <div class="text-cyan-400 font-bold uppercase tracking-[0.4em] mb-4 text-xs">Architectural Choice</div>
+            <h2 class="text-3xl font-black mb-8 italic text-white underline underline-offset-8 decoration-cyan-500/30">Why JSON despite the tax?</h2>
+            <div class="space-y-6 text-sm text-slate-300">
+                <p>1. <b>Hard Contract</b>: JSON provides a strict schema. We trade context space for zero-hallucination intent mapping.</p>
+                <p>2. <b>Native Tokenization</b>: LLMs are trained on massive codebases; they are <b>native JSON speakers</b>.</p>
+            </div>
+            <button onclick="nextStep()" class="mt-8 w-full py-4 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 font-black rounded-xl hover:bg-cyan-500/40 transition-all uppercase tracking-widest text-[10px]">Close and Continue</button>
+        </div>
+
+        <header class="flex justify-between items-start mb-4 relative z-[60] shrink-0 transition-all duration-500">
+            <div>
+                <h1 class="text-2xl font-black tracking-tighter text-violet-400 uppercase italic">ERA 3: THE HARDCODED SILO</h1>
+                <p id="header-subtitle" class="text-slate-400 text-[10px] mt-1 tracking-widest uppercase italic font-bold">Brain-Limb Interaction Loop</p>
+            </div>
+            <div class="flex gap-4 items-center bg-black/60 px-4 py-2 rounded-full border border-white/5 shadow-2xl">
+                <span class="text-[9px] text-slate-400 uppercase font-bold tracking-widest">Navigation: ← →</span>
+            </div>
+        </header>
+
+        <div id="main-workspace" class="px-2">
+            <div class="flex flex-col items-center space-y-3 h-full justify-start pt-2 relative z-50">
+                <div class="grid grid-cols-2 gap-2 shrink-0 relative">
+                    <div id="app-aws" class="app-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6"><path d="M21 8V21H3V8"/><path d="M1 3h22v5H1z"/></svg><span>AWS S3</span></div>
+                    <div id="app-gitlab" class="app-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6"><path d="m22 13-10 9-10-9V6l10-4 10 4v7Z"/></svg><span>GitLab-ML</span></div>
+                    <div id="app-browser" class="app-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span>Browser</span></div>
+                    <div id="app-email" class="app-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6"><path d="m22 2-11 11"/><path d="M22 2-7 20-4-9-9-4Z"/></svg><span>SMTP Relay</span></div>
+                </div>
+
+                <div id="user-console" class="w-full flex-1 min-h-0 pr-2">
+                    <div id="u-1" class="chat-bubble user-msg visible">"Check <b>my-robotics-data-2026</b> for Alpha's last position. Check weather. Find an Alpha image or check <b>nearby robots</b>. Run detect and email report."</div>
+                    
+                    <div id="transient-msg" class="chat-bubble user-msg text-xs bg-cyan-500/10 border-cyan-400 animate-pulse">
+                        <!-- JS injects latest result here momentarily -->
+                    </div>
+
+                    <div id="u-3" class="chat-bubble user-msg text-violet-300 italic">"Discovery Wall: Bravo metadata is blind because it isn't 'glued' to this prompt."</div>
+                    <div id="u-4" class="chat-bubble user-msg font-bold text-red-500 border-l-4 border-red-600 bg-red-500/10">"CRITICAL AMNESIA: Context full. Pruning oldest history."</div>
+                </div>
+            </div>
+
+            <div class="flex flex-col items-center justify-center relative h-full">
+                <div class="wrapper-hub" id="hub-core">
+                    <div class="text-xs font-black text-violet-400 uppercase mb-2">Hardcoded Bridge</div>
+                    <div id="hub-log" class="text-[7px] text-slate-400 font-mono text-left px-3 leading-relaxed bg-black/60 py-3 rounded-xl border border-white/10 shadow-inner overflow-hidden w-full h-[180px]">
+                        <span class="text-violet-500">// STATIC MAPPING</span><br>
+                        if (intent == 'list_s3') boto3.list();<br>
+                        if (intent == 'get_s3') boto3.get();<br>
+                        if (intent == 'scrape') scrape_web();<br>
+                        if (intent == 'detect') gitlab_run();<br>
+                        if (intent == 'smtp') send_mail();
+                    </div>
+                </div>
+                <div class="text-[9px] text-slate-500 font-black uppercase mt-4 italic">Hardcoded Translation</div>
+            </div>
+
+            <div class="prompt-column flex flex-col items-center space-y-3 h-full min-h-0 justify-start pt-2 relative z-50">
+                <div id="context-zone" class="prompt-zone relative w-full flex flex-col items-center">
+                    <div id="context-fence" class="context-fence"></div>
+                    <div class="brain-core mb-2" id="brain-visual">
+                        <div id="brain-nodes-container"></div>
+                        <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="#9d00ff" stroke-width="1.5"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"/></svg>
+                    </div>
+
+                    <div id="context-package" class="context-container">
+                        <!-- System Prompt Block -->
+                        <div id="system-prompt" class="system-prompt-block">
+                            <div class="block-label text-red-500">System Prompt</div>
+                            <span class="text-[6px] block mb-1 font-black underline tracking-wider">// ⚠️ OVERHEAD: 4.3k TOKENS</span>
+                            <div class="mt-2 space-y-4">
+                                <div><span class="font-bold text-white uppercase text-[5px]">list_s3</span><br>{ "name": "list_s3", "params": {"bucket": "string", "folder": "string"} }</div>
+                                <div><span class="font-bold text-white uppercase text-[5px]">get_s3</span><br>{ "name": "get_s3", "params": {"bucket": "string", "key": "string"} }</div>
+                                <div><span class="font-bold text-white uppercase text-[5px]">scrape</span><br>{ "name": "scrape", "params": {"url": "string"} }</div>
+                                <div><span class="font-bold text-white uppercase text-[5px]">detect</span><br>{ "name": "detect", "params": {"asset_url": "string"} }</div>
+                                <div><span class="font-bold text-white uppercase text-[5px]">smtp_send</span><br>{ "name": "smtp_send", "params": {"to": "string", "body": "string"} }</div>
+                            </div>
+                        </div>
+
+                        <!-- Active History Block -->
+                        <div id="history-block" class="history-block">
+                            <div class="block-label text-violet-400">Embedded History</div>
+                            <div id="history-content" class="flex flex-col items-center justify-center h-full space-y-2 mt-4 text-[6px]">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-20 animate-pulse">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                                <div class="opacity-30 italic">No history embedded...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ai-console" class="w-full flex-1 min-h-0 pl-2 pt-1">
+                    <div id="a-current" class="chat-bubble ai-msg font-mono text-left">
+                        <!-- Active AI intent -->
+                    </div>
+                    <div id="a-2" class="chat-bubble ai-msg opacity-50 italic text-[9px]">"Bravo limb unknown... handoff failed."</div>
+                    <div id="a-3" class="chat-bubble ai-msg border-2 border-red-500 text-red-300 bg-red-950/20">"Wait... context lost. Restarting mission loop..."</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="footer-caption" class="h-8 flex items-center justify-center border-t border-white/5 text-slate-500 text-[9px] font-black uppercase italic shrink-0 transition-all duration-500">
+            Era Status: Pulse Handshake Handled Step-by-Step
+        </div>
+    </div>
+
+    <!-- Review Overlays -->
+    <div id="nm-chaos" class="nm-chaos-mesh">
+        <div class="text-center w-full max-w-4xl space-y-12">
+            <h2 class="text-6xl font-black text-violet-500 uppercase italic tracking-tighter">The N:M Integration Tax</h2>
+            <div id="matrix-container" class="flex justify-around items-center h-64 relative"></div>
+            <p class="text-2xl text-slate-400 font-bold italic px-20">"Adding 1 model to 10 tools is manageable. Adding 5 models to 50 tools is a system collapse."</p>
+        </div>
+    </div>
+
+    <div id="conclusion-box">
+        <div class="text-red-500 font-black uppercase tracking-[0.6em] text-xs mb-4 underline underline-offset-8">Era 3 Architectural Review</div>
+        <p class="text-white text-3xl font-black leading-tight mb-8 italic">Smart Brain, <span class="text-violet-400 underline decoration-violet-400/30 underline-offset-8 tracking-widest">Context Prison</span>.</p>
+        <div class="grid grid-cols-3 gap-8 text-left px-10">
+            <div class="space-y-3 border-l-2 border-cyan-500/30 pl-4"><div class="text-cyan-400 font-black text-[10px] uppercase">1. Discovery Lock</div><p class="text-slate-400 text-sm italic">Model is blind to new limbs. Manual wiring is required.</p></div>
+            <div class="space-y-3 border-l-2 border-amber-500/30 pl-4"><div class="text-amber-400 font-black text-[10px] uppercase">2. Static Hand-off</div><p class="text-slate-400 text-sm italic">Turn-by-turn logic translation required for every move.</p></div>
+            <div class="space-y-3 border-l-2 border-red-500/30 pl-4"><div class="text-red-400 font-black text-[10px] uppercase">3. Memory Exhaustion</div><p class="text-slate-400 text-sm italic">History pulses fill the brain until pruning causes amnesia.</p></div>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('brain-nodes-container');
+        for (let i = 0; i < 25; i++) {
+            const n = document.createElement('div');
+            n.className = 'neural-node';
+            n.style.left = Math.random() * 100 + '%';
+            n.style.top = Math.random() * 100 + '%';
+            n.style.animationDelay = Math.random() * 4 + 's';
+            container.appendChild(n);
+        }
+
+        let currentStep = 0;
+        const totalSteps = 15;
+
+        const wrapper = document.getElementById('presentation-wrapper');
+        const userConsole = document.getElementById('user-console');
+        const aiConsole = document.getElementById('ai-console');
+        const transientMsg = document.getElementById('transient-msg');
+        const aiCurrent = document.getElementById('a-current');
+        const historyContent = document.getElementById('history-content');
+        const contextPackage = document.getElementById('context-package');
+        const promptBlock = document.getElementById('system-prompt');
+        const jsonModal = document.getElementById('json-modal');
+        const hub = document.getElementById('hub-core');
+        const fence = document.getElementById('context-fence');
+        const labelSuitcase = document.getElementById('label-suitcase');
+        const labelBridge = document.getElementById('label-bridge');
+        const caption = document.getElementById('footer-caption');
+        const conclusion = document.getElementById('conclusion-box');
+        const nmChaos = document.getElementById('nm-chaos');
+
+        function nextStep() { currentStep++; updatePresentation(); }
+
+        function updateWires() {
+            const hRect = hub.getBoundingClientRect();
+            const bRect = document.getElementById('brain-visual').getBoundingClientRect();
+            const hX = hRect.left + hRect.width / 2;
+            const hY = hRect.top + hRect.height / 2;
+            const bX = bRect.left + bRect.width / 2;
+            const bY = bRect.top + bRect.height / 2;
+            ['path-llm', 'flow-llm'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.setAttribute('d', `M ${hX} ${hY} Q ${(hX + bX) / 2} ${hY - 80} ${bX} ${bY}`);
+            });
+            const apps = ['app-aws', 'app-gitlab', 'app-browser', 'app-email'].map(id => document.getElementById(id).getBoundingClientRect());
+            ['aws', 'gitlab', 'browser', 'email'].forEach((key, i) => {
+                const a = apps[i];
+                if (!a) return;
+                const aX = a.left + a.width / 2;
+                const aY = a.top + a.height / 2;
+                ['path-' + key, 'flow-' + key].forEach(pid => {
+                    const el = document.getElementById(pid);
+                    if (el) el.setAttribute('d', `M ${hX} ${hY} Q ${(hX + aX) / 2} ${hY + 40} ${aX} ${aY}`);
+                });
+            });
+        }
+
+        function triggerDataFlow(limb, reverse = false) {
+            const flowEl = reverse ? document.getElementById('flow-' + (limb || 'llm')) : document.getElementById('flow-llm');
+            const targetEl = reverse ? document.getElementById('flow-llm') : document.getElementById('flow-' + (limb || 'llm'));
+            if (flowEl) { flowEl.classList.add('active'); if (reverse) flowEl.classList.add('reverse'); }
+            setTimeout(() => { if (targetEl) { targetEl.classList.add('active'); if (reverse) targetEl.classList.add('reverse'); } }, 600);
+            setTimeout(() => { if (flowEl) flowEl.classList.remove('active', 'reverse'); if (targetEl) targetEl.classList.remove('active', 'reverse'); }, 2500);
+        }
+
+        function embedToHistory(text) {
+            const div = document.createElement('div');
+            div.className = 'border-b border-violet-500/20 pb-2 mb-2 animate-pulse';
+            div.innerHTML = `<span class="text-white font-bold opacity-40 text-[8px] uppercase">Pulsed to Context:</span><br>${text}`;
+            if (historyContent.innerHTML.includes('No history')) historyContent.innerHTML = '';
+            historyContent.prepend(div);
+        }
+
+        function updatePresentation() {
+            wrapper.classList.remove('blur-active');
+            hub.style.borderColor = '#9d00ff';
+            fence.classList.remove('active');
+            contextPackage.classList.remove('zoomed');
+            jsonModal.classList.remove('visible');
+            conclusion.classList.remove('visible');
+            nmChaos.classList.remove('active');
+            transientMsg.classList.remove('visible');
+            aiCurrent.classList.remove('visible');
+            
+            document.querySelectorAll('.app-tile, .wire, .wire-flow').forEach(el => el.classList.remove('visible', 'active'));
+            document.querySelectorAll('.chat-bubble:not(.visible)').forEach(el => el.classList.remove('visible'));
+            labelSuitcase.style.opacity = '0';
+            labelBridge.style.opacity = '0';
+
+            if (currentStep === 2) {
+                wrapper.classList.add('blur-active');
+                labelSuitcase.style.opacity = '1';
+                contextPackage.classList.add('zoomed');
+                document.getElementById('path-llm').classList.add('active'); 
+                triggerDataFlow(null, true);
+                caption.innerText = "Step 02: Hardcoded Injection. The Brain's Tool List is populated manually.";
+            }
+            else if (currentStep === 3) {
+                wrapper.classList.add('blur-active');
+                contextPackage.classList.add('zoomed');
+                jsonModal.classList.add('visible');
+                document.getElementById('path-llm').classList.add('active');
+                caption.innerText = "Step 03: The Token Tax. Handshake definitions consume critical baseline memory.";
+            }
+            else if (currentStep === 4) {
+                aiCurrent.innerHTML = '<div class="bg-black/40 p-2 rounded-xl border border-violet-500/30 text-[9px]">{ "call": "list_s3", "args": {"bucket": "my-robotics-data-2026", "folder": "alpha/gps/"} }</div>';
+                aiCurrent.classList.add('visible');
+                triggerDataFlow('aws', false);
+                caption.innerText = "Step 04: Loop Cycle 1. Brain pulses S3 limb to explore data.";
+            }
+            else if (currentStep === 5) {
+                transientMsg.innerHTML = "<b>Limb Result:</b> alpha/gps/20250108_0900.json found.";
+                transientMsg.classList.add('visible');
+                document.getElementById('app-aws').classList.add('active');
+                labelBridge.style.opacity = '1';
+                triggerDataFlow('aws', true);
+                embedToHistory("S3: alpha/gps/ discovered.");
+                caption.innerText = "Step 05: Feedback Pulse. Data returns to LLM Brain to decide next move.";
+            }
+            else if (currentStep === 6) {
+                aiCurrent.innerHTML = '<div class="bg-black/40 p-2 rounded-xl border border-violet-500/30 text-[9px]">{ "call": "get_s3", "args": {"key": "alpha/gps/20250108_0900.json"} }</div>';
+                aiCurrent.classList.add('visible');
+                triggerDataFlow('aws', false);
+                caption.innerText = "Step 06: Loop Cycle 2. Brain requesting the coordinate payload.";
+            }
+            else if (currentStep === 7) {
+                transientMsg.innerHTML = "<b>Limb Result:</b> lat: 34.0195, lon: -118.4912. Santa Monica. Alpha visuals missing.";
+                transientMsg.classList.add('visible');
+                document.getElementById('app-aws').classList.add('active');
+                triggerDataFlow('aws', true);
+                embedToHistory("GPS extracted. Loc: Santa Monica.");
+                caption.innerText = "Step 07: Brain Re-evaluating. Pivot: Searching visual feed from Bravo limb.";
+            }
+            else if (currentStep === 8) {
+                aiCurrent.innerHTML = '<div class="bg-black/40 p-2 rounded-xl border border-cyan-500/30 text-[9px]">{ "call": "detect", "args": {"asset_url": "s3://.../bravo/images/cam_0900.jpg"} }</div>';
+                aiCurrent.classList.add('visible');
+                document.getElementById('app-gitlab').classList.add('active');
+                triggerDataFlow('gitlab', false);
+                caption.innerText = "Step 08: Loop Cycle 3. Brain directs ML detection on found visual.";
+            }
+            else if (currentStep === 9) {
+                transientMsg.innerHTML = "<b>Limb Result:</b> Alpha detected. Report ready for SMTP.";
+                transientMsg.classList.add('visible');
+                document.getElementById('app-email').classList.add('active');
+                triggerDataFlow('email', true);
+                embedToHistory("Detection Success. Mission loop complete.");
+                caption.innerText = "Step 09: Goal Reached. Chained handshake successfully closed.";
+            }
+            else if (currentStep === 10) {
+                document.getElementById('u-3').classList.add('visible');
+                document.getElementById('a-2').classList.add('visible');
+                hub.style.borderColor = '#f43f5e';
+                caption.innerText = "Step 10: Discovery Wall. Unknown limbs remain invisible.";
+            }
+            else if (currentStep === 11) {
+                document.getElementById('u-3').classList.add('visible');
+                caption.innerText = "Step 11: Schema Drift. Limb updates break the hardcoded HANDOFF.";
+            }
+            else if (currentStep === 12) {
+                document.getElementById('u-4').classList.add('visible');
+                document.getElementById('a-3').classList.add('visible');
+                historyContent.innerHTML = '<div class="text-red-500 font-bold uppercase animate-bounce mt-4">[CONTEXT PRUNED]</div>';
+                caption.innerText = "Step 12: Amnesia. History bloat triggers context pruning.";
+            }
+            else if (currentStep === 14) {
+                wrapper.classList.add('blur-active');
+                conclusion.classList.add('visible');
+                caption.innerText = "Era 3 Review: Smart Brain, Context Prison";
+            }
+            else if (currentStep === 15) {
+                nmChaos.classList.add('active');
+                createNMVisual();
+                caption.innerText = "The Final Tax: N Models vs M Tools.";
+            }
+
+            setTimeout(() => {
+                userConsole.scrollTo({ top: userConsole.scrollHeight, behavior: 'smooth' });
+                aiConsole.scrollTo({ top: aiConsole.scrollHeight, behavior: 'smooth' });
+            }, 100);
+            updateWires();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextStep();
+            if (e.key === 'ArrowLeft') { currentStep = Math.max(0, currentStep - 1); updatePresentation(); }
+        });
+        window.addEventListener('resize', updateWires);
+        setTimeout(updateWires, 100);
+        updatePresentation();
+    </script>
+</body>
+</html>
