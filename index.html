@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Evolution Presentation Shell</title>
+    <title>MCP Under the Hood: From Hardcoded Integrations to a Standardized Nervous System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
@@ -67,17 +67,16 @@
                 </svg>
             </div>
             <div>
-                <h1 class="text-lg font-bold tracking-widest uppercase italic">AI Evolution</h1>
-                <p id="current-title" class="text-[10px] text-slate-500 font-mono uppercase tracking-widest">Standardizing Agency</p>
+                <h1 id="current-title" class="text-lg font-bold tracking-widest uppercase italic"></h1>
             </div>
         </div>
 
         <nav class="flex gap-2" id="era-nav">
-            <button onclick="loadEra(1, 'scenario4.html', 'Standardizing Agency')" class="nav-button active px-5 py-2 rounded border border-white/5 bg-white/5 text-[10px] font-bold tracking-widest hover:bg-white/10 transition-all">Scenario</button>
-            <button onclick="loadEra(2, 'era1.html', 'Manual Isolation')" class="nav-button px-5 py-2 rounded border border-white/5 bg-white/5 text-[10px] font-bold tracking-widest hover:bg-white/10 transition-all">ERA 1</button>
-            <button onclick="loadEra(3, 'era2.html', 'Rigid Scripting')" class="nav-button px-5 py-2 rounded border border-white/5 bg-white/5 text-[10px] font-bold tracking-widest hover:bg-white/10 transition-all">ERA 2</button>
-            <button onclick="loadEra(4, 'era3-v7.html', 'Hard-Coded Silos')" class="nav-button px-5 py-2 rounded border border-white/5 bg-white/5 text-[10px] font-bold tracking-widest hover:bg-white/10 transition-all">ERA 3</button>
-            <button onclick="loadEra(5, 'era4.html', 'Reflex Arc (MCP)')" class="nav-button px-5 py-2 rounded border border-white/5 bg-white/5 text-[10px] font-bold tracking-widest hover:bg-white/10 transition-all">ERA 4</button>
+            <button onclick="loadEra(1, 'scenario4.html', 'Initial State: Fleet Telemetry & AWS Data')" class="nav-button px-5 py-2 rounded border border-white/5 bg-white/5 text-[10px] font-bold tracking-widest hover:bg-white/10 transition-all">Scenario</button>
+            <button onclick="loadEra(2, 'era1.html', 'The Blind Brain')" class="nav-button px-5 py-2 rounded border border-white/5 bg-white/5 text-[10px] font-bold tracking-widest hover:bg-white/10 transition-all">Phase 1</button>
+            <button onclick="loadEra(3, 'era2.html', 'The Tool Maker')" class="nav-button px-5 py-2 rounded border border-white/5 bg-white/5 text-[10px] font-bold tracking-widest hover:bg-white/10 transition-all">Phase 2</button>
+            <button onclick="loadEra(4, 'era3-v7.html', 'The Hardcoded Silo')" class="nav-button px-5 py-2 rounded border border-white/5 bg-white/5 text-[10px] font-bold tracking-widest hover:bg-white/10 transition-all">Phase 3</button>
+            <button onclick="loadEra(5, 'era4-v4.html', 'The MCP Reflex Arc')" class="nav-button px-5 py-2 rounded border border-white/5 bg-white/5 text-[10px] font-bold tracking-widest hover:bg-white/10 transition-all">Phase 4</button>
         </nav>
     </header>
 
@@ -115,7 +114,6 @@
             loader.classList.add('visible');
             iframe.style.opacity = '0';
 
-            // Update UI State
             titleLabel.innerText = title;
             // fileStatus.innerText = `Currently Viewing: ${fileName}`;
             
@@ -143,6 +141,9 @@
             console.error("Failed to load: " + iframe.src);
             loader.innerHTML = `<div class="text-red-500 font-bold uppercase tracking-widest">Node Not Found: ${iframe.src}</div>`;
         };
+
+        // Set initial state
+        loadEra(1, 'scenario4.html', 'Initial State: Fleet Telemetry & AWS Data');
     </script>
 </body>
 </html>

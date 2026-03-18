@@ -80,7 +80,7 @@
 
         /* Framing States */
         .view-query #logic-stage { 
-            bottom: 35vh; 
+            bottom: 15vh; 
             opacity: 1; 
             pointer-events: auto;
         }
@@ -92,7 +92,7 @@
         .view-query .step-nodes-container { display: none; }
 
         .view-steps #logic-stage { 
-            bottom: 30vh; 
+            bottom: 15vh; 
             opacity: 1; 
             pointer-events: auto;
         }
@@ -211,16 +211,15 @@
             <!-- Header -->
             <div class="flex justify-between items-start mb-10">
                 <div>
-                    <h1 class="text-4xl font-bold tracking-tighter text-cyan-400 uppercase">Mission: Cross-Robot Context</h1>
-                    <p class="text-slate-500 text-md mt-1 tracking-widest uppercase italic font-bold">The Problem: Heterogeneous Data & Blocked Information</p>
+                    <p class="text-slate-500 text-lg mt-1 tracking-widest uppercase italic font-bold">The Problem: Heterogeneous Data & Blocked Information</p>
                 </div>
-                <div class="flex gap-4 items-center">
+                <!--<div class="flex gap-4 items-center">
                     <div class="flex gap-3 items-center bg-black/60 px-6 py-3 rounded-full border border-white/5">
                         <span class="kbd-guide">←</span>
                         <span class="kbd-guide">→</span>
                         <span class="text-xs text-slate-400 uppercase font-bold tracking-widest ml-2">Navigation Keys</span>
                     </div>
-                </div>
+                </div>-->
             </div>
 
             <!-- Ecosystem Visual -->
@@ -260,7 +259,7 @@
                         <div class="absolute inset-0 animate-spin-slow opacity-10 border-2 border-white/20 rounded-full"></div>
                         <div class="w-56 h-56 bg-amber-500/5 border border-amber-500/30 rounded-[3rem] flex flex-col items-center justify-center shadow-[0_0_120px_rgba(251,191,36,0.08)]">
                             <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ffab00" stroke-width="1.2"><path d="M21 8V21H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>
-                            <div class="text-xs font-bold mt-4 text-amber-500 uppercase tracking-[0.4em]">AWS S3 Lake</div>
+                            <div class="text-xs font-bold mt-4 text-amber-500 uppercase tracking-[0.4em]">AWS S3 Bucket</div>
                         </div>
                     </div>
                 </div>
@@ -279,7 +278,7 @@
                         </div>
                         <div class="text-xs font-bold uppercase tracking-widest flex items-center">
                             Weather & News Scraper 
-                            <span class="ml-2 text-[7px] bg-cyan-500/20 text-cyan-300 px-1 rounded">BROWSER ENGINE</span>
+                            <span class="ml-2 text-[7px] bg-white/10 rounded">REST GET</span>
                         </div>
                     </div>
                     <div id="app-email" class="glow-box p-5 rounded-2xl border-green-500/20 flex items-center gap-4 opacity-40 transition-all duration-500">
@@ -298,7 +297,7 @@
                     MISSION INTELLIGENCE QUERY
                 </div>
                 <p class="text-4xl font-bold italic leading-tight text-white font-sans text-center px-12">
-                    "Find Alpha on Jan 8th. Check its last image; if missing, pivot to a robot nearby and run ML detection + Weather report."
+                    "Analyze Robot Alpha’s state on Jan 8th: retrieve its last GPS and check for an image with timestamp close to gps one. <br> If missing, pivot to the nearest robot’s feed. Run ML detection on that image, correlate with local weather/news for that positio. <br> Finally, alert the Operations Manager via Email if a high-risk threat is detected."
                 </p>
             </div>
 

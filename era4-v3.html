@@ -88,7 +88,6 @@
             box-shadow: 0 0 10px var(--green);
         }
 
-                /* Change or add this in your <style> block */
         .nav-controls {
             position: absolute;
             bottom: 90px;
@@ -96,7 +95,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            pointer-events: none; /* Let clicks pass through since buttons are gone */
+            pointer-events: none;
         }
 
         .nav-btn {
@@ -125,19 +124,17 @@
 
         .hint-text.visible { opacity: 1; }
 
-        /* Enhanced Timeline for Presentation */
-        /* Presentation-Ready Footer */
         .timeline {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 50px; /* Taller area for text visibility */
-            background: rgba(10, 12, 18, 0.95); /* Solid dark plate for contrast */
+            height: 50px;
+            background: rgba(10, 12, 18, 0.95);
             display: flex;
             justify-content: space-between;
-            align-items: flex-end; /* Align markers to the bottom */
-            padding: 0 40px; /* FIX: Prevents truncation on edges */
+            align-items: flex-end;
+            padding: 0 40px;
             box-sizing: border-box;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             pointer-events: auto;
@@ -147,7 +144,7 @@
             position: absolute;
             bottom: 0;
             left: 0;
-            height: 4px; /* The actual moving bar */
+            height: 4px;
             background: linear-gradient(90deg, var(--cyan), var(--amber));
             width: 0%;
             transition: width 1.2s cubic-bezier(0.65, 0, 0.35, 1);
@@ -166,11 +163,10 @@
             z-index: 2;
         }
 
-        /* The Label - Optimized for Presentation */
         .timeline-step::after {
             content: attr(data-label);
-            font-size: 0.75rem; /* Larger text */
-            font-weight: 800;   /* Extra bold */
+            font-size: 0.75rem;
+            font-weight: 800;
             color: var(--text-dim);
             text-transform: uppercase;
             letter-spacing: 1.5px;
@@ -178,25 +174,24 @@
             padding-bottom: 5px;
         }
 
-        /* Active State */
         .timeline-step.active::after {
             color: white;
             text-shadow: 0 0 10px var(--cyan);
             transform: translateY(-2px);
         }
 
-        /* Vertical Marker Tick */
         .timeline-step::before {
             content: '';
             width: 2px;
             height: 8px;
             background: rgba(255, 255, 255, 0.2);
-            margin-top: auto; /* Push to bottom */
+            margin-top: auto;
         }
 
         .timeline-step.active::before {
             background: var(--amber);
         }
+
         .interact-guide {
             position: absolute;
             bottom: 35px;
@@ -214,27 +209,9 @@
     <canvas id="mcp-canvas"></canvas>
 
     <div class="ui-layer">
-        <!--<div class="header">
-            <h1>The MCP Reflex Arc</h1>
-            <p>Conductor Orchestration • Biological Metaphor • Sequential Data Review</p>
-        </div>-->
-
-        <!--<div class="status-badge">
-            <div class="status-dot" id="global-status-dot"></div>
-            <span id="global-status-text">SYSTEM STANDBY</span>
-        </div>-->
-
         <div class="nav-controls">
             <div class="hint-text" id="click-hint">Director Input Required...</div>
-            <!--<div style="display: flex; gap: 10px;">
-                <button class="nav-btn" onclick="prevScene()">← BACK</button>
-                <button class="nav-btn" id="next-btn" onclick="nextScene()">NEXT STEP →</button>
-            </div>-->
         </div>
-
-        <!--<div class="interact-guide">
-            DRAG TO PAN • SCROLL TO ZOOM • HOVER UI TO SCROLL CHAT
-        </div>-->
 
         <div class="timeline">
             <div class="timeline-progress" id="timeline-progress"></div>
@@ -252,12 +229,11 @@
     const ctx = canvas.getContext('2d');
     const timelineProgress = document.getElementById('timeline-progress');
     const steps = document.querySelectorAll('.timeline-step');
-    const statusText = document.getElementById('global-status-text');
     const clickHint = document.getElementById('click-hint');
 
     let width, height, dpr;
     let scene = 0;
-    let subStep = 0; 
+    let subStep = 0;
     let camera = { x: 0, y: 0, scale: 1, targetX: 0, targetY: 0, targetScale: 0.35 };
     let frame = 0;
     let timeScale = 1.0;
@@ -273,16 +249,16 @@
     const limbX = 1000; const limbY = 0;
 
     const entities = {
-        internalHistory: [], 
-        visibleHistory: [],  
+        internalHistory: [],
+        visibleHistory: [],
         discoveredTools: [],
-        systemPromptTools: "No tools discovered yet...",
-        activeJSON: null,    
-        jsonBin: [],         
+        systemPromptTools: "No scenario tools discovered yet...",
+        activeJSON: null,
+        jsonBin: [],
         isThinking: false,
-        uiStatus: "READY", 
+        uiStatus: "READY",
         uiLock: false,
-        toolBadge: null, 
+        toolBadge: null,
         shutterOpen: true,
         guardLightning: 0,
         stopFlash: false,
@@ -297,7 +273,6 @@
         brainNodes: []
     };
 
-    // Pre-generate brain nodes for semantic grid
     for(let i=0; i<30; i++) {
         entities.brainNodes.push({
             x: Math.random() * 400 - 200,
@@ -311,7 +286,6 @@
     let lastMouseY = 0;
     let isMouseOverUI = false;
 
-    // --- DRAWING HELPERS ---
     function roundRect(ctx, x, y, width, height, radius) {
         ctx.beginPath(); ctx.moveTo(x + radius, y);
         ctx.lineTo(x + width - radius, y);
@@ -325,149 +299,95 @@
         ctx.closePath();
     }
 
-    // function drawBrainIcon(x, y, s) {
-    //     ctx.save(); ctx.translate(x, y); ctx.beginPath();
-    //     ctx.moveTo(0, -s/2); ctx.bezierCurveTo(-s*0.5, -s*0.5, -s*0.6, s*0.4, 0, s*0.5);
-    //     ctx.bezierCurveTo(s*0.6, s*0.4, s*0.5, -s*0.5, 0, -s/2); ctx.fill();
-    //     ctx.lineWidth = 4; ctx.strokeStyle = ctx.fillStyle;
-    //     const drawFold = (sx, sy, cp1x, cp1y, ex, ey) => { ctx.beginPath(); ctx.moveTo(sx, sy); ctx.quadraticCurveTo(cp1x, cp1y, ex, ey); ctx.stroke(); };
-    //     drawFold(-s*0.2, -s*0.2, -s*0.3, -s*0.05, -s*0.1, s*0.1);
-    //     drawFold(s*0.15, -s*0.25, s*0.35, -s*0.1, s*0.2, s*0.2);
-    //     ctx.restore();
-    // }
-
-    // function drawSpineIcon(x, y, h) {
-    //     ctx.save(); ctx.translate(x, y);
-    //     const vCount = 12; const vHeight = h / vCount;
-    //     for (let i = 0; i < vCount; i++) {
-    //         const vy = -h/2 + i * vHeight;
-    //         const vw = 60 + Math.sin(i * 0.8) * 15;
-    //         roundRect(ctx, -vw/2, vy, vw, vHeight * 0.7, 12); ctx.fill();
-    //         ctx.globalAlpha = 0.08; ctx.beginPath();
-    //         ctx.moveTo(-vw/2, vy + vHeight/2); ctx.quadraticCurveTo(-vw*2, vy + vHeight, -vw*3, vy + vHeight * 1.5); ctx.stroke();
-    //         ctx.beginPath(); ctx.moveTo(vw/2, vy + vHeight/2); ctx.quadraticCurveTo(vw*2, vy + vHeight, vw*3, vy + vHeight * 1.5); ctx.stroke();
-    //         ctx.globalAlpha = 0.35;
-    //     }
-    //     ctx.fillRect(-4, -h/2, 8, h); ctx.restore();
-    // }
-
-
- function drawSpineIcon(x, y, size, isHorizontal = true, scale = 1.0, rotation = 0) {
-    ctx.save();
-    ctx.translate(x, y);
-    
-    // Convert degrees to radians and apply rotation
-    ctx.rotate(rotation * Math.PI / 180);
-    ctx.scale(scale, scale);
-
-    // 1. Define S-Curve Path
-    const p0 = { x: -size / 2, y: 0 };
-    const cp1 = { x: -size / 4, y: -180 }; 
-    const cp2 = { x: size / 4, y: 180 };   
-    const p1 = { x: size / 2, y: 0 };
-
-    const vCount = 26; 
-
-    function getBezier(t, p0, cp1, cp2, p1) {
-        const cx = 3 * (cp1.x - p0.x), bx = 3 * (cp2.x - cp1.x) - cx, ax = p1.x - p0.x - cx - bx;
-        const cy = 3 * (cp1.y - p0.y), by = 3 * (cp2.y - cp1.y) - cy, ay = p1.y - p0.y - cy - by;
-        return {
-            x: ax * t**3 + bx * t**2 + cx * t + p0.x,
-            y: ay * t**3 + by * t**2 + cy * t + p0.y
-        };
-    }
-
-    // 2. Draw Glow Layer
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = COLORS.cyan;
-    ctx.strokeStyle = "rgba(0, 242, 255, 0.4)";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    
-    // If you specifically want the vertical 'logic' but tilted, 
-    // keep the rotation outside. If you want it horizontal but slanted:
-    if (!isHorizontal) ctx.rotate(Math.PI / 2);
-    
-    ctx.moveTo(p0.x, p0.y);
-    ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p1.x, p1.y);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-
-    // 3. Draw Vertebrae
-    for (let i = 0; i < vCount; i++) {
-        const t = i / (vCount - 1);
-        const pos = getBezier(t, p0, cp1, cp2, p1);
-        const nextPos = getBezier(Math.min(t + 0.01, 1), p0, cp1, cp2, p1);
-        const angle = Math.atan2(nextPos.y - pos.y, nextPos.x - pos.x);
-
+    function drawSpineIcon(x, y, size, isHorizontal = true, scale = 1.0, rotation = 0) {
         ctx.save();
-        ctx.translate(pos.x, pos.y);
-        ctx.rotate(angle); 
+        ctx.translate(x, y);
+        ctx.rotate(rotation * Math.PI / 180);
+        ctx.scale(scale, scale);
 
-        const sizeScale = 1 - Math.pow(Math.abs(t - 0.5), 2) * 1.2;
-        const vw = (60 + Math.sin(t * 8) * 15) * sizeScale;
-        const vh = 12;
+        const p0 = { x: -size / 2, y: 0 };
+        const cp1 = { x: -size / 4, y: -180 };
+        const cp2 = { x: size / 4, y: 180 };
+        const p1 = { x: size / 2, y: 0 };
+        const vCount = 26;
 
-        const grad = ctx.createLinearGradient(0, -vw/2, 0, vw/2);
-        grad.addColorStop(0, "#ffffff");
-        grad.addColorStop(0.5, COLORS.cyan); 
-        grad.addColorStop(1, "#ffffff");
+        function getBezier(t, p0, cp1, cp2, p1) {
+            const cx = 3 * (cp1.x - p0.x), bx = 3 * (cp2.x - cp1.x) - cx, ax = p1.x - p0.x - cx - bx;
+            const cy = 3 * (cp1.y - p0.y), by = 3 * (cp2.y - cp1.y) - cy, ay = p1.y - p0.y - cy - by;
+            return {
+                x: ax * t**3 + bx * t**2 + cx * t + p0.x,
+                y: ay * t**3 + by * t**2 + cy * t + p0.y
+            };
+        }
 
-        ctx.fillStyle = grad;
-        roundRect(ctx, -vh/2, -vw/2, vh, vw, 6);
-        ctx.fill();
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = COLORS.cyan;
+        ctx.strokeStyle = "rgba(0, 242, 255, 0.4)";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        if (!isHorizontal) ctx.rotate(Math.PI / 2);
+        ctx.moveTo(p0.x, p0.y);
+        ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p1.x, p1.y);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
 
-        // 4. MCP Nerves
-        if (i % 4 === 0) {
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.quadraticCurveTo(20, -vw * 1.2, 50, -vw * 1.8);
-            ctx.stroke();
-            ctx.fillStyle = COLORS.cyan;
-            ctx.beginPath();
-            ctx.arc(50, -vw * 1.8, 4, 0, Math.PI * 2);
+        for (let i = 0; i < vCount; i++) {
+            const t = i / (vCount - 1);
+            const pos = getBezier(t, p0, cp1, cp2, p1);
+            const nextPos = getBezier(Math.min(t + 0.01, 1), p0, cp1, cp2, p1);
+            const angle = Math.atan2(nextPos.y - pos.y, nextPos.x - pos.x);
+
+            ctx.save();
+            ctx.translate(pos.x, pos.y);
+            ctx.rotate(angle);
+
+            const sizeScale = 1 - Math.pow(Math.abs(t - 0.5), 2) * 1.2;
+            const vw = (60 + Math.sin(t * 8) * 15) * sizeScale;
+            const vh = 12;
+
+            const grad = ctx.createLinearGradient(0, -vw/2, 0, vw/2);
+            grad.addColorStop(0, "#ffffff");
+            grad.addColorStop(0.5, COLORS.cyan);
+            grad.addColorStop(1, "#ffffff");
+
+            ctx.fillStyle = grad;
+            roundRect(ctx, -vh/2, -vw/2, vh, vw, 6);
             ctx.fill();
+
+            if (i % 4 === 0) {
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.quadraticCurveTo(20, -vw * 1.2, 50, -vw * 1.8);
+                ctx.stroke();
+                ctx.fillStyle = COLORS.cyan;
+                ctx.beginPath();
+                ctx.arc(50, -vw * 1.8, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
         }
         ctx.restore();
     }
-    ctx.restore();
-}
-    // function drawLimbIcon(x, y, s) {
-    //     ctx.save(); ctx.translate(x, y);
-    //     ctx.beginPath(); ctx.moveTo(-s/2, 0); ctx.lineTo(-s/6, -s/8); ctx.lineTo(0, 0); ctx.lineTo(s/6, s/4);
-    //     ctx.lineWidth = 45; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
-    //     ctx.beginPath(); ctx.arc(-s/6, -s/8, 30, 0, Math.PI*2); ctx.fill();
-    //     ctx.beginPath(); ctx.ellipse(s/4, s/3.5, 50, 70, Math.PI/4, 0, Math.PI*2); ctx.fill();
-    //     ctx.restore();
-    // }
-
-        // --- ILLUSTRATIVE HELPERS ---
 
     function drawBrainIcon(x, y, s) {
         ctx.save(); ctx.translate(x, y);
-        
-        // Outer glow
         ctx.shadowBlur = 40; ctx.shadowColor = COLORS.violet;
         ctx.fillStyle = COLORS.violet;
         ctx.globalAlpha = 0.15;
-        
-        // Detailed Anatomical Lobes
+
         const drawLobe = (cx, cy, rx, ry, rot) => {
             ctx.beginPath();
             ctx.ellipse(cx, cy, rx, ry, rot, 0, Math.PI * 2);
             ctx.fill();
         };
 
-        // Frontal & Parietal
         drawLobe(-s*0.15, -s*0.1, s*0.35, s*0.25, -Math.PI/6);
         drawLobe(s*0.15, -s*0.1, s*0.35, s*0.25, Math.PI/6);
-        // Temporal
         drawLobe(-s*0.2, s*0.15, s*0.25, s*0.2, Math.PI/8);
         drawLobe(s*0.2, s*0.15, s*0.25, s*0.2, -Math.PI/8);
-        
-        // Inner Neural Grid Overlay
+
         ctx.strokeStyle = COLORS.violet;
         ctx.globalAlpha = 0.3;
         ctx.lineWidth = 1;
@@ -478,20 +398,17 @@
             ctx.stroke();
         }
 
-        // Synaptic Core
         ctx.globalAlpha = 0.6;
         ctx.fillStyle = 'white';
         ctx.shadowBlur = 20; ctx.shadowColor = 'white';
         ctx.beginPath();
         ctx.arc(0, 0, s*0.05 + Math.sin(frame*0.05)*5, 0, Math.PI*2);
         ctx.fill();
-
         ctx.restore();
     }
 
     function drawLimbIcon(x, y, s) {
         ctx.save(); ctx.translate(x, y);
-        
         ctx.strokeStyle = COLORS.gold;
         ctx.fillStyle = COLORS.gold;
         ctx.lineWidth = 15;
@@ -499,59 +416,49 @@
         ctx.lineJoin = 'round';
         ctx.globalAlpha = 0.3;
 
-        // Base/Shoulder
         ctx.beginPath();
         ctx.arc(-s/2.5, 0, 40, 0, Math.PI*2);
         ctx.stroke();
 
-        // Upper Arm
         ctx.beginPath();
         ctx.moveTo(-s/2.5, 0);
         ctx.lineTo(-s/6, -s/4);
         ctx.stroke();
 
-        // Elbow Joint
         ctx.beginPath();
         ctx.arc(-s/6, -s/4, 25, 0, Math.PI*2);
         ctx.fill();
 
-        // Forearm
         ctx.beginPath();
         ctx.moveTo(-s/6, -s/4);
         ctx.lineTo(s/6, -s/8);
         ctx.stroke();
 
-        // Wrist Joint
         ctx.beginPath();
         ctx.arc(s/6, -s/8, 15, 0, Math.PI*2);
         ctx.fill();
 
-        // Articulated Hand/Tool
         ctx.lineWidth = 8;
-        // Gripper Top
         ctx.beginPath();
         ctx.moveTo(s/6, -s/8);
         ctx.quadraticCurveTo(s/3, -s/4, s/2, -s/6);
         ctx.stroke();
-        // Gripper Bottom
         ctx.beginPath();
         ctx.moveTo(s/6, -s/8);
         ctx.quadraticCurveTo(s/3, 0, s/2, -s/12);
         ctx.stroke();
 
-        // Hydraulics/Wires
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(-s/2.5, 10);
         ctx.bezierCurveTo(-s/4, s/8, -s/10, -s/8, -s/6, -s/4 + 10);
         ctx.stroke();
-
         ctx.restore();
     }
 
     function drawBox(x, y, w, h, color, title, subtitle, radius = 12) {
         ctx.strokeStyle = color; ctx.lineWidth = 2;
-        ctx.fillStyle = 'rgba(10, 12, 20, 0.7)'; 
+        ctx.fillStyle = 'rgba(10, 12, 20, 0.7)';
         roundRect(ctx, x, y, w, h, radius); ctx.fill(); ctx.stroke();
         if (title) {
             ctx.fillStyle = color;
@@ -562,22 +469,21 @@
         }
     }
 
-    // --- UTILITIES ---
     function spawnParticles(x, y, color, target = null) {
         for(let i=0; i<15; i++) {
-            entities.particles.push({ 
-                x: x, y: y, 
-                vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, 
+            entities.particles.push({
+                x: x, y: y,
+                vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5,
                 life: 1.0, color: color,
-                target: target 
+                target: target
             });
         }
     }
 
     function createPulse(sx, sy, tx, ty, color, label, big = false, onComplete = null) {
-        entities.pulses.push({ 
-            x: sx, y: sy, tx, ty, color, label, progress: 0, 
-            speed: big ? 0.003 : 0.006, 
+        entities.pulses.push({
+            x: sx, y: sy, tx, ty, color, label, progress: 0,
+            speed: big ? 0.003 : 0.006,
             onComplete,
             isBundle: big,
             startTime: Date.now()
@@ -590,7 +496,7 @@
         height = window.innerHeight;
         canvas.width = width * dpr;
         canvas.height = height * dpr;
-        ctx.scale(dpr, dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
     function updateCamera() {
@@ -603,15 +509,11 @@
         entities.hubOpacity += (1.0 - entities.hubOpacity) * 0.1;
     }
 
-    // --- INTERACTION ---
-    // --- KEYBOARD NAVIGATION ---
     window.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight') {
-            nextScene();
-        } else if (e.key === 'ArrowLeft') {
-            prevScene();
-        }
+        if (e.key === 'ArrowRight') nextScene();
+        else if (e.key === 'ArrowLeft') prevScene();
     });
+
     canvas.addEventListener('mousedown', (e) => { isDragging = true; lastMouseX = e.clientX; lastMouseY = e.clientY; });
     window.addEventListener('mouseup', () => { isDragging = false; });
     window.addEventListener('mousemove', (e) => {
@@ -628,6 +530,7 @@
         const my = (e.clientY - rect.top - height/2) / camera.scale + camera.y;
         isMouseOverUI = (mx > spineX - 430 && mx < spineX - 180 && my > spineY - 180 && my < spineY + 380);
     });
+
     canvas.addEventListener('wheel', (e) => {
         if (isMouseOverUI) {
             e.preventDefault();
@@ -640,7 +543,6 @@
         }
     }, { passive: false });
 
-    // --- ORCHESTRATION ---
     function setScene(index) {
         scene = index; subStep = 0;
         steps.forEach((s, i) => s.classList.toggle('active', i === index));
@@ -650,7 +552,7 @@
         entities.shutterOpen = true; entities.activeJSON = null;
         entities.stopFlash = false; entities.semanticMatching = false;
         entities.jsonBin = []; entities.pulses = []; clickHint.classList.remove('visible');
-        if (index === 0) { camera.targetX = spineX + 170; camera.targetY = spineY + 200; camera.targetScale = 0.6; statusText.innerText = "System Standby"; }
+        if (index === 0) { camera.targetX = spineX + 170; camera.targetY = spineY + 200; camera.targetScale = 0.6; }
         else if (index === 1) { camera.targetX = spineX - 250; camera.targetY = 0; camera.targetScale = 0.8; }
         else if (index === 2) { camera.targetX = -500; camera.targetY = 0; camera.targetScale = 0.8; }
         else if (index === 4) { camera.targetX = 0; camera.targetY = 0; camera.targetScale = 0.45; }
@@ -660,12 +562,12 @@
         if (scene === 0) {
             if (subStep === 0) {
                 subStep = 1; camera.targetX = spineX + 100; camera.targetY = spineY - 10; camera.targetScale = 1;
-                entities.systemPromptTools = "Base constraints only. [Empty Handshake]";
+                entities.systemPromptTools = "Cobot scenario loaded. Awaiting targeted discovery.";
                 setTimeout(() => { clickHint.innerText = "REVIEW DISCOVERY REQUEST"; clickHint.classList.add('visible'); }, 1000);
                 return;
             } else if (subStep === 1) {
                 subStep = 2; camera.targetX = spineX + 150; camera.targetScale = 1.6;
-                entities.activeJSON = "// Handshake Request: tools/list\n{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/list\",\n  \"id\": 1\n}";
+                entities.activeJSON = "// Scenario-Scoped Discovery Request\n{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/list\",\n  \"params\": {\n    \"hint\": \"Need S3 access for cobot logs and close-up image lookup\"\n  },\n  \"id\": 1\n}";
                 clickHint.innerText = "DISPATCH DISCOVERY";
                 return;
             } else if (subStep === 2) {
@@ -676,8 +578,8 @@
                 return;
             } else if (subStep === 3) {
                 subStep = 4; camera.targetX = limbX - 120; camera.targetY = 0; camera.targetScale = 0.9;
-                entities.activeJSON = "// Combined Multi-Server Response\n{\n  \"tools\": [\n    {\"name\": \"sql_query\", \"args\": {...}},\n    {\"name\": \"git_push\", \"args\": {...}},\n    {\"name\": \"weather\", \"args\": {...}}\n  ]\n}";
-                clickHint.innerText = "STAPLE ALL TOOLS";
+                entities.activeJSON = "// Relevant MCP Tools Returned\n{\n  \"tools\": [\n    {\"name\": \"weather_lookup\", \"args\": {...}},\n    {\"name\": \"list_aws_s3\", \"args\": {\"bucket\": \"string\", \"prefix\": \"string\"}},\n    {\"name\": \"email_dispatch\", \"args\": {...}}\n  ]\n}";
+                clickHint.innerText = "STAPLE SCENARIO TOOLS";
                 return;
             } else if (subStep === 4) {
                 subStep = 5; entities.activeJSON = null; camera.targetX = 400; camera.targetScale = 0.45;
@@ -686,7 +588,7 @@
                     createPulse(limbX - 120, limbY + off, spineX + 150, spineY + 380, COLORS.violet, "Sync", false, () => {
                         if(i === 1) {
                             camera.targetX = spineX + 180; camera.targetY = spineY - 70; camera.targetScale = 1.3;
-                            entities.systemPromptTools = "Discovered: sql_query, git_push, weather";
+                            entities.systemPromptTools = "Discovered: weather_lookup, list_aws_s3, email_dispatch";
                             setTimeout(() => { setScene(1); }, 2000);
                         }
                     });
@@ -697,24 +599,24 @@
 
         if (scene === 1) {
             if (subStep === 0) {
-                subStep = 1; entities.uiStatus = "READY"; 
-                entities.visibleHistory.push({ role: "user", text: "Query DB count." });
+                subStep = 1; entities.uiStatus = "READY";
+                entities.visibleHistory.push({ role: "user", text: "Find Alpha cobot on Jan 8. Check image in S3. Show AWS MCP path." });
                 setTimeout(() => {
                     createPulse(spineX - 350, spineY + 120, spineX + 110, spineY + 50, COLORS.violet, "History Sync", false, () => {
                         camera.targetX = spineX + 150; camera.targetScale = 1.3;
-                        entities.internalHistory.push({ role: "user", text: "Query DB count." });
+                        entities.internalHistory.push({ role: "user", text: "Find Alpha cobot on Jan 8. Check image in S3. Show AWS MCP path." });
                         setTimeout(() => { clickHint.innerText = "REVIEW DIVERGENT CONFIG"; clickHint.classList.add('visible'); }, 800);
                     });
                 }, 500);
                 return;
             } else if (subStep === 1) {
                 subStep = 2; camera.targetX = spineX + 110; camera.targetScale = 1.6;
-                entities.activeJSON = "// Parallel Dispatch Payload\n// Bundle -> Brain | Config -> Guardrail\n{\n  \"messages\": [History contents...],\n  \"stop_sequences\": [\"</tool_call>\"],\n  \"max_tokens\": 4096\n}";
+                entities.activeJSON = "// Parallel Dispatch Payload\n// Bundle -> Brain | Config -> Guardrail\n{\n  \"messages\": [\"User asks for Alpha cobot position and image from S3 on Jan 8\"],\n  \"stop_sequences\": [\"</tool_call>\"],\n  \"max_tokens\": 4096\n}";
                 clickHint.innerText = "TRANSFORM & DISPATCH";
                 return;
-            } else if (subStep === 2) { 
+            } else if (subStep === 2) {
                 subStep = 3; entities.activeJSON = null; camera.targetX = -500; camera.targetScale = 0.55;
-                entities.hubScaleX = 0.001; entities.hubScaleY = 0.001; entities.hubOpacity = 0.2; 
+                entities.hubScaleX = 0.001; entities.hubScaleY = 0.001; entities.hubOpacity = 0.2;
                 setTimeout(() => {
                     createPulse(spineX + 110, spineY + 50, brainX + 220, brainY - 15, COLORS.violet, "HISTORY BUNDLE", true, () => {
                         entities.semanticMatching = true; camera.targetX = brainX + 220; camera.targetScale = 1.3;
@@ -728,31 +630,31 @@
 
         if (scene === 2) {
             if (subStep === 0) {
-                subStep = 1; camera.targetX = -450; camera.targetScale = 1.1; 
-                createPulse(brainX + 220, brainY, spineX - 100, spineY + 150, 'white', "token: 'Sure'", false, () => {
-                    entities.visibleHistory.push({ role: "assistant", text: "Sure, let me check..." });
-                    entities.internalHistory.push({ role: "assistant", text: "Sure, let me check..." });
+                subStep = 1; camera.targetX = -450; camera.targetScale = 1.1;
+                createPulse(brainX + 220, brainY, spineX - 100, spineY + 150, 'white', "token: 'Checking S3'", false, () => {
+                    entities.visibleHistory.push({ role: "assistant", text: "I’ll inspect the relevant S3 location for Alpha..." });
+                    entities.internalHistory.push({ role: "assistant", text: "I’ll inspect the relevant S3 location for Alpha..." });
                     setTimeout(() => { clickHint.innerText = "LLM EMITS TOOL TAG"; clickHint.classList.add('visible'); }, 1000);
                 });
                 return;
             } else if (subStep === 1) {
                 subStep = 2; camera.targetX = brainX + 220; camera.targetScale = 1.6;
-                entities.activeJSON = "// Stream Interception: <tool_call> tag found\n\"... </thought><tool_call>{\"name\": \"sql_query\"}\"";
+                entities.activeJSON = "// Stream Interception: <tool_call> tag found\n\"... </thought><tool_call>{\\\"name\\\": \\\"list_aws_s3\\\"}\"";
                 clickHint.innerText = "DIVERT TO BIN";
                 return;
-            } else if (subStep === 2) { // Tool Divert
+            } else if (subStep === 2) {
                 subStep = 3; entities.activeJSON = null; camera.targetX = -300; camera.targetScale = 1.0;
                 createPulse(brainX + 220, brainY, spineX - 100, spineY + 150, COLORS.amber, "<tool_call>", false, () => {
-                    entities.toolBadge = { name: "SQL DB", status: 'gray' }; 
+                    entities.toolBadge = { name: "AWS S3", status: 'gray' };
                     setTimeout(() => {
                         createPulse(brainX + 220, brainY, spineX + 315, spineY + 240, COLORS.gold, "token: '{...}'", false, () => {
-                            entities.jsonBin.push("{ \"call\": \"sql_query\" }");
+                            entities.jsonBin.push("{ \"call\": \"list_aws_s3\" }");
                             clickHint.innerText = "DETECTION: </tool_call>"; clickHint.classList.add('visible');
                         });
                     }, 1000);
                 });
                 return;
-            } else if (subStep === 3) { // Guardrail INTERCEPTION (Modification)
+            } else if (subStep === 3) {
                 subStep = 4; clickHint.classList.remove('visible');
                 camera.targetX = -500; camera.targetScale = 1.2;
                 createPulse(brainX + 220, brainY, brainX + 220, brainY + 150, COLORS.red, "STOP TOKEN", false, () => {
@@ -768,18 +670,18 @@
         if (scene === 3) {
             if (subStep === 0) {
                 subStep = 1; camera.targetX = spineX + 315; camera.targetScale = 1.8;
-                entities.activeJSON = "// Raw Buffered Fragment\n{\n  \"call\": \"sql_query\",\n  \"arguments\": {\"query\": \"SELECT count(*)\"}\n}";
+                entities.activeJSON = "// Raw Buffered Fragment\n{\n  \"call\": \"list_aws_s3\",\n  \"arguments\": {\n    \"bucket\": \"cobot-observations\",\n    \"prefix\": \"alpha/2025-01-08/\"\n  }\n}";
                 clickHint.innerText = "WRAP INTO JSON-RPC";
                 return;
             } else if (subStep === 1) {
                 subStep = 2; camera.targetX = spineX + 110; camera.targetScale = 1.6;
-                entities.activeJSON = "// Wrapped Protocol Envelope\n{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"params\": {\"name\": \"sql_query\", ...},\n  \"id\": \"rpc_99\"\n}";
+                entities.activeJSON = "// Wrapped Protocol Envelope\n{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"list_aws_s3\",\n    \"arguments\": {\n      \"bucket\": \"cobot-observations\",\n      \"prefix\": \"alpha/2025-01-08/\"\n    }\n  },\n  \"id\": \"rpc_99\"\n}";
                 clickHint.innerText = "DISPATCH TO SERVER";
                 return;
             } else if (subStep === 2) {
                 subStep = 3; entities.activeJSON = null; camera.targetX = limbX - 100; camera.targetScale = 0.55;
-                createPulse(spineX + 110, spineY + 410, limbX - 120, limbY, COLORS.violet, "Wrapped Pulse", true, () => {
-                    createPulse(limbX - 120, limbY, limbX + 350, limbY, COLORS.gold, "HTTP REST Call", true, () => setScene(4));
+                createPulse(spineX + 110, spineY + 410, limbX - 120, limbY, COLORS.violet, "MCP tools/call", true, () => {
+                    createPulse(limbX - 120, limbY, limbX + 350, limbY, COLORS.gold, "List S3 Objects", true, () => setScene(4));
                 });
                 return;
             }
@@ -788,18 +690,18 @@
         if (scene === 4) {
             if (subStep === 0) {
                 subStep = 1; camera.targetX = limbX + 180; camera.targetScale = 1.6;
-                entities.activeJSON = "// Raw Application Data\nHTTP/1.1 200 OK\n{ \"count\": 144, \"status\": \"online\" }";
+                entities.activeJSON = "// Raw AWS S3 Result\nHTTP/1.1 200 OK\n{ \"bucket\": \"cobot-observations\", \"prefix\": \"alpha/2025-01-08/\", \"keys\": [\"gps/log_0900.json\", \"images/frame_0900.jpg\"] }";
                 clickHint.innerText = "SEND TO SERVER";
                 return;
             } else if (subStep === 1) {
                 subStep = 2; entities.activeJSON = null; camera.targetX = limbX - 100; camera.targetScale = 0.7;
-                createPulse(limbX + 350, limbY, limbX - 120, limbY, COLORS.gold, "HTTP 200 OK", false, () => {
+                createPulse(limbX + 350, limbY, limbX - 120, limbY, COLORS.gold, "S3 Objects Found", false, () => {
                     setTimeout(() => { clickHint.innerText = "REVIEW PROTOCOL RESULT"; clickHint.classList.add('visible'); }, 500);
                 });
                 return;
             } else if (subStep === 2) {
                 subStep = 3; camera.targetX = limbX - 120; camera.targetScale = 1.6;
-                entities.activeJSON = "// JSON-RPC Compliance Envelope\n{\n  \"jsonrpc\": \"2.0\",\n  \"result\": {\"content\": [{\"text\": \"{members: 144}\"}]},\n  \"id\": \"rpc_99\"\n}";
+                entities.activeJSON = "// JSON-RPC Compliance Envelope\n{\n  \"jsonrpc\": \"2.0\",\n  \"result\": {\n    \"content\": [{\n      \"text\": \"{bucket: cobot-observations, prefix: alpha/2025-01-08/, keys: [gps/log_0900.json, images/frame_0900.jpg]}\"\n    }]\n  },\n  \"id\": \"rpc_99\"\n}";
                 clickHint.innerText = "SEND TO CONDUCTOR";
                 return;
             } else if (subStep === 3) {
@@ -810,8 +712,8 @@
                 return;
             } else if (subStep === 4) {
                 subStep = 5; camera.targetX = spineX + 150; camera.targetY = spineY + 50; camera.targetScale = 1.3;
-                entities.internalHistory.push({ role: "tool", text: "{count: 144}" });
-                if (entities.toolBadge) entities.toolBadge.status = 'green'; 
+                entities.internalHistory.push({ role: "tool", text: "{bucket: cobot-observations, keys: [gps/log_0900.json, images/frame_0900.jpg]}" });
+                if (entities.toolBadge) entities.toolBadge.status = 'green';
                 setTimeout(() => { clickHint.innerText = "REVIEW FINAL DECISION BUNDLE"; clickHint.classList.add('visible'); }, 800);
                 return;
             } else if (subStep === 5) {
@@ -828,9 +730,9 @@
                         createPulse(brainX + 220, brainY + 50, spineX - 100, spineY + 150, 'white', "Synthesis Ready", false, () => {
                             camera.targetX = spineX - 305; camera.targetY = 0; camera.targetScale = 2.0;
                             entities.uiLock = false; entities.uiStatus = "READY";
-                            const msg = "Database retrieved: 144 members identified.";
+                            const msg = "S3 listing retrieved for Alpha on Jan 8: GPS log and image found.";
                             entities.visibleHistory.push({ role: "assistant", text: msg });
-                            entities.internalHistory.push({ role: "assistant", text: msg }); 
+                            entities.internalHistory.push({ role: "assistant", text: msg });
                             entities.uiScrollOffset = Math.max(0, entities.visibleHistory.length * 85 - 350);
                         });
                     }, 1500);
@@ -851,12 +753,11 @@
         ctx.scale(camera.scale, camera.scale);
         ctx.globalAlpha = 0.25;
         ctx.fillStyle = COLORS.violet; drawBrainIcon(brainX + 220, brainY + 50, 600);
-        ctx.globalAlpha = 0.35; ctx.fillStyle = COLORS.cyan;// Example: Horizontal, 0.5 scale, tilted 15 degrees downward
-                            drawSpineIcon(spineX , spineY + 200 , 1600, true, 0.8, 50);
+        ctx.globalAlpha = 0.35; ctx.fillStyle = COLORS.cyan;
+        drawSpineIcon(spineX , spineY + 200 , 1600, true, 0.8, 50);
         ctx.globalAlpha = 0.25; ctx.fillStyle = COLORS.gold; drawLimbIcon(limbX + 150, limbY + 100, 600);
         ctx.globalAlpha = 1.0;
 
-        // --- THE BRAIN ---
         drawBox(brainX, brainY - 30, 440, 130, COLORS.violet, "🧠 BRAIN (LLM ENGINE)", "STATELESS WEIGHTS", 30);
         if (entities.semanticMatching) {
             ctx.save();
@@ -865,14 +766,23 @@
             ctx.beginPath(); ctx.moveTo(brainX + 20, brainY + scanY); ctx.lineTo(brainX + 420, brainY + scanY); ctx.stroke();
             entities.brainNodes.forEach(n => {
                 const dist = Math.abs((brainY + scanY) - (brainY + n.y)); n.intensity = Math.max(0, 1 - dist/50);
-                if (n.intensity > 0) { ctx.shadowBlur = 15 * n.intensity; ctx.shadowColor = COLORS.cyan; ctx.fillStyle = `rgba(0, 242, 255, ${n.intensity})`; ctx.beginPath(); ctx.arc(brainX + 220 + n.x, brainY + 30 + n.y, 3 * n.intensity, 0, Math.PI*2); ctx.fill(); }
+                if (n.intensity > 0) {
+                    ctx.shadowBlur = 15 * n.intensity;
+                    ctx.shadowColor = COLORS.cyan;
+                    ctx.fillStyle = `rgba(0, 242, 255, ${n.intensity})`;
+                    ctx.beginPath();
+                    ctx.arc(brainX + 220 + n.x, brainY + 30 + n.y, 3 * n.intensity, 0, Math.PI*2);
+                    ctx.fill();
+                }
             });
             ctx.restore();
         }
         drawBox(brainX, brainY + 150, 440, 100, COLORS.violet, "🛡️ GUARDRAIL LAYER", "STOP-SEQ MONITOR", 0);
-        if(entities.stopFlash && frame % 10 < 5) { ctx.fillStyle = COLORS.red; ctx.font = 'bold 12px monospace'; ctx.textAlign = 'center'; ctx.fillText("STOP DETECTED", brainX + 220, brainY + 225); }
+        if(entities.stopFlash && frame % 10 < 5) {
+            ctx.fillStyle = COLORS.red; ctx.font = 'bold 12px monospace'; ctx.textAlign = 'center';
+            ctx.fillText("STOP DETECTED", brainX + 220, brainY + 225);
+        }
 
-        // --- CHAT UI ---
         const uiX = spineX - 270; const uiY = spineY - 180; const uiW = 250; const uiH = 560;
         drawBox(uiX, uiY, uiW, uiH, "#333", "USER UI", "FEED", 8);
         ctx.save(); ctx.beginPath(); roundRect(ctx, uiX + 5, uiY + 105, uiW - 10, 380, 4); ctx.clip();
@@ -886,16 +796,25 @@
         });
         ctx.restore();
         if(entities.uiStatus === "THINKING") {
-            const up = (Math.sin(frame * 0.1) + 1) * 0.5; ctx.fillStyle = `rgba(157, 0, 255, ${0.1 + up * 0.2})`; roundRect(ctx, uiX + 15, uiY + 60, uiW - 30, 40, 4); ctx.fill();
-            ctx.fillStyle = COLORS.violet; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center'; ctx.fillText("Gemini is thinking...", uiX + uiW/2, uiY + 85);
+            const up = (Math.sin(frame * 0.1) + 1) * 0.5;
+            ctx.fillStyle = `rgba(157, 0, 255, ${0.1 + up * 0.2})`;
+            roundRect(ctx, uiX + 15, uiY + 60, uiW - 30, 40, 4); ctx.fill();
+            ctx.fillStyle = COLORS.violet; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
+            ctx.fillText("Gemini is thinking...", uiX + uiW/2, uiY + 85);
         }
         if(entities.toolBadge) {
-            ctx.fillStyle = (entities.toolBadge.status === 'green') ? COLORS.green : '#444'; roundRect(ctx, uiX + 15, uiY + uiH - 55, uiW - 30, 35, 17); ctx.fill();
-            ctx.fillStyle = (entities.toolBadge.status === 'green') ? 'black' : 'white'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center'; ctx.fillText((entities.toolBadge.status === 'green' ? "✓ Ready: " : "⚙ Active: ") + entities.toolBadge.name, uiX + uiW/2, uiY + uiH - 33);
+            ctx.fillStyle = (entities.toolBadge.status === 'green') ? COLORS.green : '#444';
+            roundRect(ctx, uiX + 15, uiY + uiH - 55, uiW - 30, 35, 17); ctx.fill();
+            ctx.fillStyle = (entities.toolBadge.status === 'green') ? 'black' : 'white';
+            ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+            ctx.fillText((entities.toolBadge.status === 'green' ? "✓ Ready: " : "⚙ Active: ") + entities.toolBadge.name, uiX + uiW/2, uiY + uiH - 33);
         }
 
-        // --- HISTORY HUB ---
-        ctx.save(); ctx.translate(spineX + 115, spineY + 100); ctx.scale(entities.hubScaleX, entities.hubScaleY); ctx.translate(-(spineX + 115), -(spineY + 100)); ctx.globalAlpha = entities.hubOpacity;
+        ctx.save();
+        ctx.translate(spineX + 115, spineY + 100);
+        ctx.scale(entities.hubScaleX, entities.hubScaleY);
+        ctx.translate(-(spineX + 115), -(spineY + 100));
+        ctx.globalAlpha = entities.hubOpacity;
         drawBox(spineX , spineY - 180, 530, 560, COLORS.violet, "HISTORY HUB", "CONDUCTOR HOST", 12);
         ctx.fillStyle = 'rgba(157, 0, 255, 0.15)'; roundRect(ctx, spineX + 20, spineY - 130, 500, 100, 4); ctx.fill();
         ctx.fillStyle = COLORS.violet; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'left'; ctx.fillText("SYSTEM PROMPT (CONTEXT)", spineX + 30, spineY - 118);
@@ -907,41 +826,25 @@
         ctx.restore();
 
         drawBox(spineX + 370, spineY + 240, 130, 100, COLORS.amber, "JSON BIN", "BUFFER", 6);
-        entities.jsonBin.forEach((b, i) => { ctx.fillStyle = COLORS.gold; ctx.font = '7px monospace'; ctx.textAlign = 'center'; ctx.fillText(b, spineX + 380, spineY + 295 + (i*12)); });
+        entities.jsonBin.forEach((b, i) => {
+            ctx.fillStyle = COLORS.gold; ctx.font = '7px monospace'; ctx.textAlign = 'center';
+            ctx.fillText(b, spineX + 435, spineY + 295 + (i*12));
+        });
         drawBox(spineX - 270, spineY + 410, 810, 110, COLORS.cyan, "📡 MCP CLIENT", "DISPATCHER", 0);
 
-        // [-240, 0, 240].forEach((off, i) => {
-        //     const y = limbY + off; drawBox(limbX - 120, y - 45, 220, 90, COLORS.cyan, ["Weather - MCP Server","Postgres - MCP Server","Git - MCP Server"][i], "STDIO", 4);
-        //     const appX = limbX + 180; drawBox(appX, y - 45, 250, 90, COLORS.gold, ["Cloud","DB Hub","Repo"][i], "REST API", 4);
-        //     ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(255, 215, 0, 0.4)'; ctx.beginPath(); ctx.moveTo(limbX + 100, y); ctx.lineTo(appX, y); ctx.stroke(); ctx.setLineDash([]);
-        //     ctx.strokeStyle = 'rgba(0, 242, 255, 0.3)'; ctx.beginPath(); ctx.moveTo(limbX - 120, y); ctx.lineTo(spineX + 380, spineY + 450); ctx.stroke();
-        // });
-
-        // Define the transport data
         const serverData = [
-            { name: "Emailer", transport: "SSE/STDIO", color: COLORS.cyan, node: "Cloud API" },
-            { name: "AWS CLI", transport: "STDIO/SSE", color: COLORS.cyan, node: "Local DB" },
-            { name: "GitLab", transport: "STDIO", color: COLORS.cyan, node: "Filesystem" }
+            { name: "Weather", transport: "SSE/STDIO", color: COLORS.cyan, node: "Weather API" },
+            { name: "AWS S3", transport: "STDIO/SSE", color: COLORS.cyan, node: "S3 Bucket" },
+            { name: "Emailer", transport: "STDIO", color: COLORS.cyan, node: "SMTP Service" }
         ];
 
         [-240, 0, 240].forEach((off, i) => {
             const data = serverData[i];
             const y = limbY + off;
-            
-            // 1. Draw the MCP Server Box (Dynamic label and color based on transport)
-            drawBox(
-                limbX - 120, y - 45, 220, 90, 
-                data.color,                // Border color based on transport
-                `${data.name} - MCP Server`,      // Server Name
-                data.transport,            // Transport Type (STDIO vs SSE)
-                4
-            );
-
-            // 2. Draw the External Resource Box
+            drawBox(limbX - 120, y - 45, 220, 90, data.color, `${data.name} - MCP Server`, data.transport, 4);
             const appX = limbX + 180;
             drawBox(appX, y - 45, 250, 90, COLORS.gold, data.node, "EXTERNAL", 4);
 
-            // 3. Draw the connection to the external resource (Dashed)
             ctx.setLineDash([5, 5]);
             ctx.strokeStyle = 'rgba(255, 215, 0, 0.4)';
             ctx.beginPath();
@@ -950,55 +853,64 @@
             ctx.stroke();
             ctx.setLineDash([]);
 
-            // 4. Draw the "Nerve" to the Spine (Dynamic color)
-            // We use data.color to show the difference between SSE (Amber) and STDIO (Cyan)
-            ctx.strokeStyle = data.color + "4D"; // Adding transparency (4D = ~30% alpha)
+            ctx.strokeStyle = data.color + "4D";
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(limbX - 121, y);
-            
-            // Bending the nerve toward the Spine
             ctx.bezierCurveTo(
-                limbX - 200, y - 50,  // Control point 1 (pulling towards the limb)
-                spineX + 700, spineY + 200, 
+                limbX - 200, y - 50,
+                spineX + 700, spineY + 200,
                 spineX + 540, spineY + 500
             );
             ctx.stroke();
         });
 
-        ctx.restore(); 
+        ctx.restore();
 
-        // --- STABILIZED HUD ---
         if(entities.activeJSON) {
             ctx.save();
             const monW = 600; const monH = 340; const monX = width/2 - monW/2; const monY = height - monH - 120;
-            ctx.fillStyle = 'rgba(25, 27, 35, 0.98)'; ctx.strokeStyle = '#444'; ctx.lineWidth = 2; roundRect(ctx, monX, monY, monW, monH, 8); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = 'rgba(25, 27, 35, 0.98)'; ctx.strokeStyle = '#444'; ctx.lineWidth = 2;
+            roundRect(ctx, monX, monY, monW, monH, 8); ctx.fill(); ctx.stroke();
             ctx.fillStyle = 'rgba(255, 255, 255, 0.03)'; roundRect(ctx, monX, monY, monW, 30, 8); ctx.fill();
             ctx.fillStyle = '#888'; ctx.font = 'bold 12px monospace'; ctx.fillText(">> TECH DIAGNOSTIC Readout", monX + 15, monY + 20);
-            ctx.fillStyle = '#eee'; ctx.font = '10px monospace'; entities.activeJSON.split('\n').forEach((l, i) => ctx.fillText(l, monX + 20, monY + 55 + (i * 18)));
+            ctx.fillStyle = '#eee'; ctx.font = '10px monospace';
+            entities.activeJSON.split('\n').forEach((l, i) => ctx.fillText(l, monX + 20, monY + 55 + (i * 18)));
             ctx.restore();
         }
 
-        ctx.save(); ctx.translate(width/2 - camera.x * camera.scale, height/2 - camera.y * camera.scale); ctx.scale(camera.scale, camera.scale);
+        ctx.save();
+        ctx.translate(width/2 - camera.x * camera.scale, height/2 - camera.y * camera.scale);
+        ctx.scale(camera.scale, camera.scale);
         entities.pulses.forEach((p, i) => {
-            p.progress += p.speed; const curX = p.x + (p.tx - p.x) * p.progress; const curY = p.y + (p.ty - p.y) * p.progress;
+            p.progress += p.speed;
+            const curX = p.x + (p.tx - p.x) * p.progress;
+            const curY = p.y + (p.ty - p.y) * p.progress;
             if (p.isBundle) {
-                const b = Math.sin(p.progress * Math.PI) * 15; const size = 15 + b; ctx.globalAlpha = 0.2; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(curX, curY, size + 10, 0, Math.PI*2); ctx.fill();
+                const b = Math.sin(p.progress * Math.PI) * 15; const size = 15 + b;
+                ctx.globalAlpha = 0.2; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(curX, curY, size + 10, 0, Math.PI*2); ctx.fill();
                 ctx.globalAlpha = 0.5; ctx.beginPath(); ctx.arc(curX, curY, size, 0, Math.PI*2); ctx.stroke();
-                ctx.save(); ctx.translate(curX, curY); ctx.rotate(frame * 0.1); ctx.fillStyle = 'white'; for(let j=0; j<4; j++) { ctx.fillRect(size/2, 0, 4, 4); ctx.rotate(Math.PI/2); } ctx.restore(); ctx.globalAlpha = 1.0;
+                ctx.save(); ctx.translate(curX, curY); ctx.rotate(frame * 0.1); ctx.fillStyle = 'white';
+                for(let j=0; j<4; j++) { ctx.fillRect(size/2, 0, 4, 4); ctx.rotate(Math.PI/2); }
+                ctx.restore(); ctx.globalAlpha = 1.0;
             }
-            ctx.fillStyle = 'rgba(0,0,0,0.85)'; const tWidth = ctx.measureText(p.label).width; roundRect(ctx, curX - tWidth/2 - 8, curY - 35, tWidth + 16, 20, 4); ctx.fill();
+            ctx.fillStyle = 'rgba(0,0,0,0.85)';
+            const tWidth = ctx.measureText(p.label).width;
+            roundRect(ctx, curX - tWidth/2 - 8, curY - 35, tWidth + 16, 20, 4); ctx.fill();
             ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(curX, curY, p.isBundle ? 10 : 7, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = 'white'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center'; ctx.fillText(p.label, curX, curY - 21);
             if(p.progress >= 1) { spawnParticles(curX, curY, p.color); if(p.onComplete) p.onComplete(p); entities.pulses.splice(i, 1); }
         });
 
         entities.particles.forEach((p, i) => {
-            if (p.target) { p.x += (p.target.x - p.x) * 0.1; p.y += (p.target.y - p.y) * 0.1; } else { p.x += p.vx; p.y += p.vy; }
-            p.life -= 0.015; ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 4, 4); if(p.life <= 0) entities.particles.splice(i, 1);
+            if (p.target) { p.x += (p.target.x - p.x) * 0.1; p.y += (p.target.y - p.y) * 0.1; }
+            else { p.x += p.vx; p.y += p.vy; }
+            p.life -= 0.015; ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 4, 4);
+            if(p.life <= 0) entities.particles.splice(i, 1);
         });
         ctx.globalAlpha = 1; ctx.restore();
     }
+
     init();
 </script>
 </body>

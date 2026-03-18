@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The MCP Reflex Arc: Biological Orchestration</title>
+  <style>
+    :root {
+      --bg-color: #05060b;
+      --cyan: #00f2ff;
+      --amber: #ffab00;
+      --red: #ff3e3e;
+      --violet: #9d00ff;
+      --green: #00ff88;
+      --gold: #ffd700;
+      --grey-hud: #1a1c23;
+      --text-dim: #9aa3c7;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-color);
+      font-family: 'JetBrains Mono', monospace;
+      color: white;
+      user-select: none;
+    }
+
+    #canvas-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+
+    canvas:active { cursor: grabbing; }
+
+    .ui-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .header {
+      position: absolute;
+      top: 26px;
+      left: 34px;
+      pointer-events: auto;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      line-height: 1.2;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      border-left: 4px solid var(--cyan);
+      padding-left: 14px;
+      text-shadow: 0 0 12px rgba(0,242,255,0.25);
+    }
+
+    .status-badge {
+      position: absolute;
+      top: 28px;
+      right: 34px;
+      padding: 10px 16px;
+      background: rgba(15,18,25,0.82);
+      border-radius: 10px;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(0,242,255,0.24);
+      pointer-events: auto;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.28);
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 10px var(--green);
+    }
+
+    .nav-controls {
+      position: absolute;
+      bottom: 90px;
+      right: 34px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+      align-items: flex-end;
+    }
+
+    .hint-text {
+      max-width: 360px;
+      color: var(--amber);
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-align: right;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      padding: 10px 14px;
+      background: rgba(20, 16, 6, 0.7);
+      border: 1px solid rgba(255,171,0,0.28);
+      border-radius: 12px;
+      backdrop-filter: blur(6px);
+    }
+
+    .hint-text.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .timeline {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 58px;
+      background: rgba(10,12,18,0.95);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 32px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      pointer-events: auto;
+    }
+
+    .timeline-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--cyan), var(--amber));
+      width: 0%;
+      transition: width 1.2s cubic-bezier(0.65, 0, 0.35, 1);
+      box-shadow: 0 -2px 12px rgba(0,242,255,0.45);
+      z-index: 1;
+    }
+
+    .timeline-step {
+      position: relative;
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      min-width: 0;
+    }
+
+    .timeline-step::after {
+      content: attr(data-label);
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      transition: all 0.35s ease;
+      padding-bottom: 6px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .timeline-step.active::after {
+      color: white;
+      text-shadow: 0 0 12px rgba(0,242,255,0.45);
+      transform: translateY(-1px);
+    }
+
+    .timeline-step::before {
+      content: '';
+      width: 2px;
+      height: 8px;
+      background: rgba(255,255,255,0.16);
+      margin-top: auto;
+    }
+
+    .timeline-step.active::before { background: var(--amber); }
+
+    .interact-guide {
+      position: absolute;
+      bottom: 34px;
+      left: 34px;
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container">
+    <canvas id="mcp-canvas"></canvas>
+
+    <div class="ui-layer">
+      <div class="header">
+        <h1>The MCP Reflex Arc</h1>
+      </div>
+
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <div>MCP Flow Demo</div>
+      </div>
+
+      <div class="nav-controls">
+        <div class="hint-text" id="click-hint">Director Input Required...</div>
+      </div>
+
+      <div class="interact-guide">Arrow keys to step • drag to pan • wheel to zoom</div>
+
+      <div class="timeline">
+        <div class="timeline-progress" id="timeline-progress"></div>
+        <div class="timeline-step active" data-step="0" data-label="Handshake Discovery"></div>
+        <div class="timeline-step" data-step="1" data-label="Semantic Sync"></div>
+        <div class="timeline-step" data-step="2" data-label="The Sieve Loop"></div>
+        <div class="timeline-step" data-step="3" data-label="Effector Action"></div>
+        <div class="timeline-step" data-step="4" data-label="Synthesis & Answer"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('mcp-canvas');
+    const ctx = canvas.getContext('2d');
+    const timelineProgress = document.getElementById('timeline-progress');
+    const steps = document.querySelectorAll('.timeline-step');
+    const clickHint = document.getElementById('click-hint');
+
+    let width, height, dpr;
+    let scene = 0;
+    let subStep = 0;
+    let camera = { x: 0, y: 0, scale: 1, targetX: 0, targetY: 0, targetScale: 0.35 };
+    let frame = 0;
+    let timeScale = 1.0;
+
+    const COLORS = {
+      cyan: '#00f2ff', amber: '#ffab00', red: '#ff3e3e',
+      violet: '#9d00ff', green: '#00ff88', gold: '#ffd700',
+      bg: '#05060b', textDim: '#9aa3c7', panel: 'rgba(10, 12, 20, 0.76)'
+    };
+
+    const brainX = -1000, brainY = 0;
+    const spineX = 0, spineY = 0;
+    const limbX = 1000, limbY = 0;
+
+    const FINAL_S3_OUTPUT = [
+      '2026-03-13 16:53:40          0 alpha/gps/',
+      '2026-03-13 19:38:22         70 alpha/gps/20250105_0900.json',
+      '2026-03-13 19:38:23         70 alpha/gps/20250105_1300.json',
+      '2026-03-13 19:38:24         70 alpha/gps/20250105_1800.json',
+      '2026-03-13 19:38:25         70 alpha/gps/20250108_0100.json',
+      '2026-03-13 19:38:25         70 alpha/gps/20250108_0230.json',
+      '2026-03-13 18:33:46         67 alpha/gps/pos_1.json',
+      '2026-03-13 18:33:47         67 alpha/gps/pos_2.json',
+      '2026-03-13 18:33:48         67 alpha/gps/pos_3.json',
+      '2026-03-13 16:53:39          0 alpha/images/',
+      '2026-03-13 16:53:42          0 bravo/gps/',
+      '2026-03-13 19:40:32         21 bravo/gps/j5_1.json',
+      '2026-03-13 19:40:33         21 bravo/gps/j5_2.json',
+      '2026-03-13 19:40:33         21 bravo/gps/j8_1.json',
+      '2026-03-13 19:40:34         21 bravo/gps/j8_2.json',
+      '2026-03-13 18:35:08         34 bravo/gps/log_A.json',
+      '2026-03-13 18:35:09         34 bravo/gps/log_B.json',
+      '2026-03-13 18:35:10         34 bravo/gps/log_C.json',
+      '2026-03-13 16:53:41          0 bravo/images/',
+      '2026-03-14 11:06:05      50102 bravo/images/20250108T023000Z_event.jpg',
+      '2026-03-14 11:06:44     226042 bravo/images/20250109T023000Z_event.jpg',
+      '2026-03-13 19:41:18         18 charlie/gps/20250105T090000Z/coords.txt',
+      '2026-03-13 19:41:18         18 charlie/gps/20250105T150000Z/coords.txt',
+      '2026-03-13 19:41:19         18 charlie/gps/20250108T023000Z/coords.txt',
+      '2026-03-13 18:35:35         23 charlie/gps/20260313T171000Z/coords.txt',
+      '2026-03-13 18:35:36         23 charlie/gps/20260313T171010Z/coords.txt',
+      '2026-03-13 18:35:36         23 charlie/gps/20260313T171020Z/coords.txt',
+      '2026-03-13 16:53:43          0 charlie/images/',
+      '~ $'
+    ];
+
+    const entities = {
+      internalHistory: [],
+      visibleHistory: [],
+      discoveredTools: [],
+      systemPromptTools: 'No scenario tools discovered yet...',
+      activeJSON: null,
+      jsonBin: [],
+      isThinking: false,
+      uiStatus: 'READY',
+      uiLock: false,
+      toolBadge: null,
+      shutterOpen: true,
+      guardLightning: 0,
+      stopFlash: false,
+      semanticMatching: false,
+      pulses: [],
+      particles: [],
+      brainBrightness: 1.0,
+      uiScrollOffset: 0,
+      hubScaleX: 1.0,
+      hubScaleY: 1.0,
+      hubOpacity: 1.0,
+      brainNodes: []
+    };
+
+    for (let i = 0; i < 30; i++) {
+      entities.brainNodes.push({
+        x: Math.random() * 400 - 200,
+        y: Math.random() * 100 - 50,
+        intensity: 0
+      });
+    }
+
+    let isDragging = false;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
+    let isMouseOverUI = false;
+
+    function roundRect(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    function fitText(text, maxWidth, fontSpec) {
+      ctx.font = fontSpec;
+      if (ctx.measureText(text).width <= maxWidth) return text; 
+      let trimmed = text;
+      while (trimmed.length > 3 && ctx.measureText(trimmed + '...').width > maxWidth) {
+        trimmed = trimmed.slice(0, -1);
+      }
+      return trimmed + '...';
+    }
+
+    function drawMultilineText(text, x, y, maxWidth, lineHeight, color, fontSpec, maxLines = 4) {
+      ctx.font = fontSpec;
+      ctx.fillStyle = color;
+      ctx.textAlign = 'left';
+      const words = text.split(' ');
+      const lines = [];
+      let line = '';
+      for (let n = 0; n < words.length; n++) {
+        const test = line ? line + ' ' + words[n] : words[n];
+        if (ctx.measureText(test).width > maxWidth && line) {
+          lines.push(line);
+          line = words[n];
+        } else {
+          line = test;
+        }
+      }
+      if (line) lines.push(line);
+      const visible = lines.slice(0, maxLines);
+      if (lines.length > maxLines) {
+        visible[maxLines - 1] = fitText(visible[maxLines - 1], maxWidth, fontSpec);
+      }
+      visible.forEach((l, i) => ctx.fillText(l, x, y + i * lineHeight));
+    }
+
+    function drawSpineIcon(x, y, size, isHorizontal = true, scale = 1.0, rotation = 0) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rotation * Math.PI / 180);
+      ctx.scale(scale, scale);
+
+      const p0 = { x: -size / 2, y: 0 };
+      const cp1 = { x: -size / 4, y: -180 };
+      const cp2 = { x: size / 4, y: 180 };
+      const p1 = { x: size / 2, y: 0 };
+      const vCount = 26;
+
+      function getBezier(t, p0, cp1, cp2, p1) {
+        const cx = 3 * (cp1.x - p0.x), bx = 3 * (cp2.x - cp1.x) - cx, ax = p1.x - p0.x - cx - bx;
+        const cy = 3 * (cp1.y - p0.y), by = 3 * (cp2.y - cp1.y) - cy, ay = p1.y - p0.y - cy - by;
+        return {
+          x: ax * t ** 3 + bx * t ** 2 + cx * t + p0.x,
+          y: ay * t ** 3 + by * t ** 2 + cy * t + p0.y
+        };
+      }
+
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = COLORS.cyan;
+      ctx.strokeStyle = 'rgba(0, 242, 255, 0.4)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      if (!isHorizontal) ctx.rotate(Math.PI / 2);
+      ctx.moveTo(p0.x, p0.y);
+      ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p1.x, p1.y);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      for (let i = 0; i < vCount; i++) {
+        const t = i / (vCount - 1);
+        const pos = getBezier(t, p0, cp1, cp2, p1);
+        const nextPos = getBezier(Math.min(t + 0.01, 1), p0, cp1, cp2, p1);
+        const angle = Math.atan2(nextPos.y - pos.y, nextPos.x - pos.x);
+
+        ctx.save();
+        ctx.translate(pos.x, pos.y);
+        ctx.rotate(angle);
+
+        const sizeScale = 1 - Math.pow(Math.abs(t - 0.5), 2) * 1.2;
+        const vw = (60 + Math.sin(t * 8) * 15) * sizeScale;
+        const vh = 12;
+
+        const grad = ctx.createLinearGradient(0, -vw/2, 0, vw/2);
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(0.5, COLORS.cyan);
+        grad.addColorStop(1, '#ffffff');
+
+        ctx.fillStyle = grad;
+        roundRect(ctx, -vh/2, -vw/2, vh, vw, 6);
+        ctx.fill();
+
+        if (i % 4 === 0) {
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.quadraticCurveTo(20, -vw * 1.2, 50, -vw * 1.8);
+          ctx.stroke();
+          ctx.fillStyle = COLORS.cyan;
+          ctx.beginPath();
+          ctx.arc(50, -vw * 1.8, 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    function drawBrainIcon(x, y, s) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.shadowBlur = 40;
+      ctx.shadowColor = COLORS.violet;
+      ctx.fillStyle = COLORS.violet;
+      ctx.globalAlpha = 0.15;
+
+      const drawLobe = (cx, cy, rx, ry, rot) => {
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx, ry, rot, 0, Math.PI * 2);
+        ctx.fill();
+      };
+
+      drawLobe(-s*0.15, -s*0.1, s*0.35, s*0.25, -Math.PI/6);
+      drawLobe(s*0.15, -s*0.1, s*0.35, s*0.25, Math.PI/6);
+      drawLobe(-s*0.2, s*0.15, s*0.25, s*0.2, Math.PI/8);
+      drawLobe(s*0.2, s*0.15, s*0.25, s*0.2, -Math.PI/8);
+
+      ctx.strokeStyle = COLORS.violet;
+      ctx.globalAlpha = 0.3;
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 10; i++) {
+        ctx.beginPath();
+        ctx.moveTo(-s*0.4, -s*0.3 + i*s*0.06);
+        ctx.lineTo(s*0.4, -s*0.3 + i*s*0.06);
+        ctx.stroke();
+      }
+
+      ctx.globalAlpha = 0.6;
+      ctx.fillStyle = 'white';
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = 'white';
+      ctx.beginPath();
+      ctx.arc(0, 0, s*0.05 + Math.sin(frame*0.05)*5, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawLimbIcon(x, y, s) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.strokeStyle = COLORS.gold;
+      ctx.fillStyle = COLORS.gold;
+      ctx.lineWidth = 15;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.globalAlpha = 0.3;
+
+      ctx.beginPath();
+      ctx.arc(-s/2.5, 0, 40, 0, Math.PI*2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(-s/2.5, 0);
+      ctx.lineTo(-s/6, -s/4);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(-s/6, -s/4, 25, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(-s/6, -s/4);
+      ctx.lineTo(s/6, -s/8);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(s/6, -s/8, 15, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.moveTo(s/6, -s/8);
+      ctx.quadraticCurveTo(s/3, -s/4, s/2, -s/6);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(s/6, -s/8);
+      ctx.quadraticCurveTo(s/3, 0, s/2, -s/12);
+      ctx.stroke();
+
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-s/2.5, 10);
+      ctx.bezierCurveTo(-s/4, s/8, -s/10, -s/8, -s/6, -s/4 + 10);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawBox(x, y, w, h, color, title, subtitle, radius = 12) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.fillStyle = COLORS.panel;
+      roundRect(ctx, x, y, w, h, radius);
+      ctx.fill();
+      ctx.stroke();
+      if (title) {
+        ctx.fillStyle = color;
+        ctx.font = '700 17px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(title, x + w/2, y + 28);
+        ctx.font = '600 10px "JetBrains Mono", monospace';
+        ctx.fillStyle = COLORS.textDim;
+        ctx.fillText(subtitle, x + w/2, y + 46);
+      }
+    }
+
+    function spawnParticles(x, y, color, target = null) {
+      for (let i = 0; i < 15; i++) {
+        entities.particles.push({
+          x, y,
+          vx: (Math.random()-0.5)*5,
+          vy: (Math.random()-0.5)*5,
+          life: 1.0,
+          color,
+          target
+        });
+      }
+    }
+
+    function createPulse(sx, sy, tx, ty, color, label, big = false, onComplete = null) {
+      entities.pulses.push({
+        x: sx, y: sy, tx, ty, color, label, progress: 0,
+        speed: big ? 0.003 : 0.006,
+        onComplete,
+        isBundle: big,
+        startTime: Date.now()
+      });
+    }
+
+    function resize() {
+      dpr = window.devicePixelRatio || 1;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function updateCamera() {
+      camera.x += (camera.targetX - camera.x) * (0.055 * timeScale);
+      camera.y += (camera.targetY - camera.y) * (0.055 * timeScale);
+      camera.scale += (camera.targetScale - camera.scale) * (0.055 * timeScale);
+
+      entities.hubScaleX += (1.0 - entities.hubScaleX) * 0.1;
+      entities.hubScaleY += (1.0 - entities.hubScaleY) * 0.1;
+      entities.hubOpacity += (1.0 - entities.hubOpacity) * 0.1;
+    }
+
+    function focusOn(x, y, scale) {
+      camera.targetX = x;
+      camera.targetY = y;
+      camera.targetScale = scale;
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') nextScene();
+      else if (e.key === 'ArrowLeft') prevScene();
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        const dx = (e.clientX - lastMouseX) / camera.scale;
+        const dy = (e.clientY - lastMouseY) / camera.scale;
+        camera.targetX -= dx;
+        camera.targetY -= dy;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+      }
+      const rect = canvas.getBoundingClientRect();
+      const mx = (e.clientX - rect.left - width/2) / camera.scale + camera.x;
+      const my = (e.clientY - rect.top - height/2) / camera.scale + camera.y;
+      isMouseOverUI = (mx > spineX - 430 && mx < spineX - 180 && my > spineY - 180 && my < spineY + 380);
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+      if (isMouseOverUI) {
+        e.preventDefault();
+        entities.uiScrollOffset += e.deltaY * 0.5;
+        const maxScroll = Math.max(0, entities.visibleHistory.length * 95 - 340);
+        entities.uiScrollOffset = Math.max(0, Math.min(entities.uiScrollOffset, maxScroll));
+      } else {
+        camera.targetScale *= (1 - e.deltaY * 0.001);
+        camera.targetScale = Math.max(0.18, Math.min(camera.targetScale, 3.0));
+      }
+    }, { passive: false });
+
+    function setScene(index) {
+      scene = index;
+      subStep = 0;
+      steps.forEach((s, i) => s.classList.toggle('active', i === index));
+      timelineProgress.style.width = (index / (steps.length - 1)) * 100 + '%';
+      entities.guardLightning = 0;
+      entities.isThinking = false;
+      entities.uiStatus = 'READY';
+      entities.uiLock = (index >= 2);
+      entities.shutterOpen = true;
+      entities.activeJSON = null;
+      entities.stopFlash = false;
+      entities.semanticMatching = false;
+      entities.jsonBin = [];
+      entities.pulses = [];
+      clickHint.classList.remove('visible');
+
+      if (index === 0) focusOn(spineX + 170, spineY + 180, 0.66);
+      else if (index === 1) focusOn(spineX - 80, 0, 0.9);
+      else if (index === 2) focusOn(brainX + 250, 10, 0.9);
+      else if (index === 3) focusOn(spineX + 260, spineY + 320, 1.05);
+      else if (index === 4) focusOn(0, 0, 0.5);
+    }
+
+    window.nextScene = function() {
+      if (scene === 0) {
+        if (subStep === 0) {
+          subStep = 1;
+          focusOn(spineX + 90, spineY - 10, 1.02);
+          entities.systemPromptTools = 'No scenario tools discovered yet...';
+          setTimeout(() => {
+            clickHint.innerText = 'Review discovery request';
+            clickHint.classList.add('visible');
+          }, 700);
+          return;
+        } else if (subStep === 1) {
+          subStep = 2;
+          focusOn(spineX + 165, spineY + 10, 1.72);
+          entities.activeJSON = `// Scenario-Scoped Discovery Request\n{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/list\",\n ,\n  \"id\": 1\n}`; //  \"params\": {\n    \"hint\": \"Need an AWS S3 tool suitable for recursively listing a robotics data bucket so the assistant can answer from real bucket contents.\"\n  }
+          clickHint.innerText = 'Dispatch discovery';
+          return;
+        } else if (subStep === 2) {
+          subStep = 3;
+          entities.activeJSON = null;
+          focusOn(420, 0, 0.5);
+          const limbOffsets = [-240, 0, 240];
+          limbOffsets.forEach((off) => createPulse(spineX + 150, spineY + 380, limbX - 120, limbY + off, COLORS.cyan, 'list tools'));
+          setTimeout(() => {
+            clickHint.innerText = 'Review server manifest';
+            clickHint.classList.add('visible');
+          }, 1200);
+          return;
+        } else if (subStep === 3) {
+          subStep = 4;
+          focusOn(limbX - 90, 0, 1.02);
+          entities.activeJSON = `// Relevant MCP Tools Returned\n{\n  \"tools\": [\n    {\"name\": \"send_email\", \"description\": \"Send an email\", \"args\": {...}},\n    {\"name\": \"list_aws_s3\", \"args\": {\"bucket\": \"string\", \"recursive\": true}},\n    {\"name\": \"email_dispatch\", \"args\": {...}}\n  ]\n}`;
+          clickHint.innerText = 'Staple scenario tools';
+          return;
+        } else if (subStep === 4) {
+          subStep = 5;
+          entities.activeJSON = null;
+          focusOn(360, -20, 0.58);
+          const limbOffsets = [-240, 0, 240];
+          limbOffsets.forEach((off, i) => {
+            createPulse(limbX - 120, limbY + off, spineX + 150, spineY + 380, COLORS.violet, 'Sync', false, () => {
+              if (i === 1) {
+                focusOn(spineX + 175, spineY - 45, 1.34);
+                entities.systemPromptTools = 'Discovered: send_email, list_aws_s3, run_yolo_detection';
+                setTimeout(() => setScene(1), 1800);
+              }
+            });
+          });
+          return;
+        }
+      }
+
+      if (scene === 1) {
+        if (subStep === 0) {
+          subStep = 1;
+          entities.uiStatus = 'READY';
+          entities.visibleHistory.push({ role: 'user', text: 'Find Alpha\'s last position in my-robotics-data-2026. Check news at that location. Find Alpha image or check nearby robots. Run detect and email report.' });
+          setTimeout(() => {
+            createPulse(spineX - 350, spineY + 120, spineX + 110, spineY + 50, COLORS.violet, 'History Sync', false, () => {
+              focusOn(spineX + 150, spineY + 30, 1.38);
+              entities.internalHistory.push({ role: 'user', text: 'Find Alpha\'s last position in my-robotics-data-2026. Check news at that location. Find Alpha image or check nearby robots. Run detect and email report.' });
+              setTimeout(() => {
+                clickHint.innerText = 'Review divergent config';
+                clickHint.classList.add('visible');
+              }, 700);
+            });
+          }, 400);
+          return;
+        } else if (subStep === 1) {
+          subStep = 2;
+          focusOn(spineX + 115, spineY + 30, 1.78);
+          entities.activeJSON = `// Parallel Dispatch Payload\n// Bundle -> Brain | Config -> Guardrail\n{\n  \"messages\": [\"Find Alpha\'s last position in my-robotics-data-2026. Check news  \n at that location. Find Alpha image or check nearby robots. Run detect and email report.\"],\n  \"stop_sequences\": [\"<tool_call>\"],\n  \"max_tokens\": 4096\n}`;
+          clickHint.innerText = 'Transform & dispatch';
+          return;
+        } else if (subStep === 2) {
+          subStep = 3;
+          entities.activeJSON = null;
+          focusOn(-500, 0, 0.58);
+          entities.hubScaleX = 0.001;
+          entities.hubScaleY = 0.001;
+          entities.hubOpacity = 0.2;
+          setTimeout(() => {
+            createPulse(spineX + 110, spineY + 50, brainX + 220, brainY - 15, COLORS.violet, 'HISTORY BUNDLE', true, () => {
+              entities.semanticMatching = true;
+              focusOn(brainX + 220, brainY + 20, 1.38);
+              setTimeout(() => { entities.semanticMatching = false; setScene(2); }, 2600);
+            });
+            createPulse(spineX + 110, spineY + 50, brainX + 220, brainY + 150, COLORS.green, 'STOP-SEQ CONFIG', false);
+          }, 200);
+          return;
+        }
+      }
+
+      if (scene === 2) {
+        if (subStep === 0) {
+          subStep = 1;
+          focusOn(brainX + 250, brainY + 10, 1.2);
+          createPulse(brainX + 220, brainY, spineX - 100, spineY + 150, 'white', "token: 'Checking bucket'", false, () => {
+            entities.visibleHistory.push({ role: 'assistant', text: 'I’ll inspect the bucket via the AWS MCP tool and base the answer on the returned recursive listing.' });
+            entities.internalHistory.push({ role: 'assistant', text: 'I’ll inspect the bucket via the AWS MCP tool and base the answer on the returned recursive listing.' });
+            setTimeout(() => {
+              clickHint.innerText = 'LLM emits tool tag';
+              clickHint.classList.add('visible');
+            }, 800);
+          });
+          return;
+        } else if (subStep === 1) {
+          subStep = 2;
+          focusOn(brainX + 220, brainY, 1.8);
+          entities.activeJSON = `// Stream Interception: <tool_call> tag found\n\"... </thought><tool_call>{\\\"name\\\": \\\"list_aws_s3\\\"}\"`;
+          clickHint.innerText = 'Divert to bin';
+          return;
+        } else if (subStep === 2) {
+          subStep = 3;
+          entities.activeJSON = null;
+          focusOn(-250, 20, 1.08);
+          createPulse(brainX + 220, brainY, spineX - 100, spineY + 150, COLORS.amber, '<tool_call>', false, () => {
+            entities.toolBadge = { name: 'AWS S3', status: 'gray' };
+            setTimeout(() => {
+              createPulse(brainX + 220, brainY, spineX + 315, spineY + 240, COLORS.gold, "token: '{...}'", false, () => {
+                entities.jsonBin.push('{ "call": "list_aws_s3" }');
+                clickHint.innerText = 'Detection: </tool_call>';
+                clickHint.classList.add('visible');
+              });
+            }, 800);
+          });
+          return;
+        } else if (subStep === 3) {
+          subStep = 4;
+          clickHint.classList.remove('visible');
+          focusOn(brainX + 220, brainY + 70, 1.26);
+          createPulse(brainX + 220, brainY, brainX + 220, brainY + 150, COLORS.red, 'STOP TOKEN', false, () => {
+            entities.stopFlash = true;
+            entities.guardLightning = 1.0;
+            spawnParticles(brainX + 220, brainY + 150, COLORS.red);
+            setTimeout(() => setScene(3), 1800);
+          });
+          return;
+        }
+      }
+
+      if (scene === 3) {
+        if (subStep === 0) {
+          subStep = 1;
+          focusOn(spineX + 330, spineY + 270, 2.0);
+          entities.activeJSON = `// Raw Buffered Fragment\n{\n  \"call\": \"list_aws_s3\",\n  \"arguments\": {\n    \"bucket\": \"my-robotics-data-2026\",\n    \"recursive\": true\n  }\n}`;
+          clickHint.innerText = 'Wrap into JSON-RPC';
+          return;
+        } else if (subStep === 1) {
+          subStep = 2;
+          focusOn(spineX + 110, spineY + 250, 1.88);
+          entities.activeJSON = `// Wrapped Protocol Envelope\n{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"list_aws_s3\",\n    \"arguments\": {\n      \"bucket\": \"my-robotics-data-2026\",\n      \"recursive\": true\n    }\n  },\n  \"id\": \"rpc_99\"\n}`;
+          clickHint.innerText = 'Dispatch to server';
+          return;
+        } else if (subStep === 2) {
+          subStep = 3;
+          entities.activeJSON = null;
+          focusOn(limbX - 80, limbY, 0.62);
+          createPulse(spineX + 110, spineY + 410, limbX - 120, limbY, COLORS.violet, 'MCP tools/call', true, () => {
+            createPulse(limbX - 120, limbY, limbX + 350, limbY, COLORS.gold, 'aws s3 ls --recursive', true, () => setScene(4));
+          });
+          return;
+        }
+      }
+
+      if (scene === 4) {
+        if (subStep === 0) {
+          subStep = 1;
+          focusOn(limbX + 170, limbY + 10, 1.54);
+          entities.activeJSON = `// Raw AWS S3 Result\n${FINAL_S3_OUTPUT.slice(0, 11).join('\n')}\n...`;
+          clickHint.innerText = 'Send to server';
+          return;
+        } else if (subStep === 1) {
+          subStep = 2;
+          entities.activeJSON = null;
+          focusOn(limbX - 60, limbY, 0.78);
+          createPulse(limbX + 350, limbY, limbX - 120, limbY, COLORS.gold, 'Recursive listing returned', false, () => {
+            setTimeout(() => {
+              clickHint.innerText = 'Review protocol result';
+              clickHint.classList.add('visible');
+            }, 400);
+          });
+          return;
+        } else if (subStep === 2) {
+          subStep = 3;
+          focusOn(limbX - 115, limbY, 1.48);
+          entities.activeJSON = `// JSON-RPC Compliance Envelope\n{\n  \"jsonrpc\": \"2.0\",\n  \"result\": {\n    \"content\": [{\n      \"text\": \" 2026-03-13 16:53:40 0 alpha/gps/ \n 2026-03-13 19:38:22 70 alpha/gps/20250105_0900.json \n 2026-03-13 19:38:23 70 alpha/gps/20250105_1300.json \n2026-03-13 19:38:24 70 alpha/gps/20250105_1800.json \n2026-03-13 19:38:25 70 alpha/gps/20250108_0100.json \n2026-03-13 19:38:25 70 alpha/gps/20250108_0230.json  .... \"\n    }]\n  },\n  \"id\": \"rpc_99\"\n}`;
+          clickHint.innerText = 'Send to conductor';
+          return;
+        } else if (subStep === 3) {
+          subStep = 4;
+          entities.activeJSON = null;
+          focusOn(380, 0, 0.52);
+          createPulse(limbX - 120, limbY, spineX + 110, spineY + 410, COLORS.green, 'JSON-RPC Result', false, () => {
+            setTimeout(() => {
+              clickHint.innerText = 'Sync to history hub';
+              clickHint.classList.add('visible');
+            }, 350);
+          });
+          return;
+        } else if (subStep === 4) {
+          subStep = 5;
+          focusOn(spineX + 155, spineY + 60, 1.36);
+          entities.internalHistory.push({ role: 'tool', text: 'aws s3 ls s3://my-robotics-data-2026 --recursive => recursive object listing returned successfully' });
+          if (entities.toolBadge) entities.toolBadge.status = 'green';
+          setTimeout(() => {
+            clickHint.innerText = 'Review final decision bundle';
+            clickHint.classList.add('visible');
+          }, 700);
+          return;
+        } else if (subStep === 5) {
+          subStep = 6;
+          focusOn(spineX + 110, spineY + 50, 1.76);
+          entities.activeJSON = `// Sequential Memory Bundle\n{\n  \"messages\": [USER, TOOL_RESULT],\n  \"instruction\": \"Answer with the exact recursive listing returned by the AWS tool.\"\n}`;
+          clickHint.innerText = 'Final cognitive pulse';
+          return;
+        } else if (subStep === 6) {
+          subStep = 7;
+          entities.activeJSON = null;
+          focusOn(brainX + 230, brainY + 40, 0.62);
+          entities.hubScaleX = 0.001;
+          entities.hubScaleY = 0.001;
+          entities.hubOpacity = 0.2;
+          createPulse(spineX + 110, spineY + 50, brainX + 220, brainY + 50, COLORS.green, 'SEQUENTIAL BUNDLE', true, () => {
+            entities.isThinking = true;
+            setTimeout(() => {
+              createPulse(brainX + 220, brainY + 50, spineX - 100, spineY + 150, 'white', 'Synthesis Ready', false, () => {
+                focusOn(spineX - 310, 0, 2.18);
+                entities.uiLock = false;
+                entities.uiStatus = 'READY';
+                entities.visibleHistory.push({ role: 'assistant', text: FINAL_S3_OUTPUT.join('\n') });
+                entities.internalHistory.push({ role: 'assistant', text: 'Final answer returned with exact recursive listing from my-robotics-data-2026.' });
+                entities.uiScrollOffset = Math.max(0, entities.visibleHistory.length * 95 - 320);
+              });
+            }, 1200);
+          });
+          return;
+        }
+      }
+    };
+
+    window.prevScene = function() {
+      if (scene > 0) setScene(scene - 1);
+    };
+
+    function init() {
+      resize();
+      window.addEventListener('resize', resize);
+      animate();
+      setScene(0);
+    }
+
+    function animate() {
+      frame++;
+      updateCamera();
+      draw();
+      requestAnimationFrame(animate);
+    }
+
+    function draw() {
+      ctx.fillStyle = COLORS.bg;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.save();
+      ctx.translate(width/2 - camera.x * camera.scale, height/2 - camera.y * camera.scale);
+      ctx.scale(camera.scale, camera.scale);
+
+      ctx.globalAlpha = 0.25;
+      drawBrainIcon(brainX + 220, brainY + 50, 600);
+      ctx.globalAlpha = 0.35;
+      drawSpineIcon(spineX, spineY + 200, 1600, true, 0.8, 50);
+      ctx.globalAlpha = 0.25;
+      drawLimbIcon(limbX + 150, limbY + 100, 600);
+      ctx.globalAlpha = 1;
+
+      drawBox(brainX, brainY - 30, 440, 130, COLORS.violet, '🧠 BRAIN (LLM ENGINE)', 'STATELESS WEIGHTS', 30);
+      if (entities.semanticMatching) {
+        ctx.save();
+        const scanY = (frame % 80) / 80 * 110 - 20;
+        ctx.strokeStyle = COLORS.cyan;
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(brainX + 20, brainY + scanY);
+        ctx.lineTo(brainX + 420, brainY + scanY);
+        ctx.stroke();
+        entities.brainNodes.forEach(n => {
+          const dist = Math.abs((brainY + scanY) - (brainY + n.y));
+          n.intensity = Math.max(0, 1 - dist/50);
+          if (n.intensity > 0) {
+            ctx.shadowBlur = 15 * n.intensity;
+            ctx.shadowColor = COLORS.cyan;
+            ctx.fillStyle = `rgba(0, 242, 255, ${n.intensity})`;
+            ctx.beginPath();
+            ctx.arc(brainX + 220 + n.x, brainY + 30 + n.y, 3 * n.intensity, 0, Math.PI*2);
+            ctx.fill();
+          }
+        });
+        ctx.restore();
+      }
+
+      drawBox(brainX, brainY + 150, 440, 100, COLORS.violet, '🛡️ GUARDRAIL LAYER', 'STOP-SEQ MONITOR', 12);
+      if (entities.stopFlash && frame % 10 < 5) {
+        ctx.fillStyle = COLORS.red;
+        ctx.font = '700 14px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('STOP DETECTED', brainX + 220, brainY + 222);
+      }
+
+      const uiX = spineX - 270, uiY = spineY - 180, uiW = 250, uiH = 560;
+      drawBox(uiX, uiY, uiW, uiH, '#4e556e', 'USER UI', 'FEED', 10);
+      ctx.save();
+      ctx.beginPath();
+      roundRect(ctx, uiX + 5, uiY + 102, uiW - 10, 392, 8);
+      ctx.clip();
+      entities.visibleHistory.forEach((h, i) => {
+        const vy = uiY + 112 + (i * 95) - entities.uiScrollOffset;
+        ctx.fillStyle = h.role === 'user' ? 'rgba(0,242,255,0.12)' : 'rgba(0,255,136,0.08)';
+        roundRect(ctx, uiX + 10, vy, uiW - 20, 86, 10);
+        ctx.fill();
+        ctx.fillStyle = h.role === 'user' ? COLORS.cyan : COLORS.green; 
+        ctx.font = '700 10px "JetBrains Mono", monospace';
+        ctx.textAlign = 'left';
+        ctx.fillText(h.role.toUpperCase(), uiX + 20, vy + 18); 
+        drawMultilineText(h.text, uiX + 20, vy + 38, uiW - 40, 16, 'white', '500 11px "JetBrains Mono", monospace', 4);
+      });
+      ctx.restore();
+
+      if (entities.uiStatus === 'THINKING') {
+        const up = (Math.sin(frame * 0.1) + 1) * 0.5;
+        ctx.fillStyle = `rgba(157, 0, 255, ${0.12 + up * 0.2})`;
+        roundRect(ctx, uiX + 15, uiY + 58, uiW - 30, 40, 8);
+        ctx.fill();
+        ctx.fillStyle = COLORS.violet;
+        ctx.font = '700 11px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('LLM is thinking...', uiX + uiW/2, uiY + 83);
+      }
+
+      if (entities.toolBadge) {
+        ctx.fillStyle = entities.toolBadge.status === 'green' ? COLORS.green : '#444';
+        roundRect(ctx, uiX + 15, uiY + uiH - 55, uiW - 30, 35, 17);
+        ctx.fill();
+        ctx.fillStyle = entities.toolBadge.status === 'green' ? 'black' : 'white';
+        ctx.font = '700 11px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText((entities.toolBadge.status === 'green' ? '✓ Ready: ' : '⚙ Active: ') + entities.toolBadge.name, uiX + uiW/2, uiY + uiH - 33);
+      }
+
+      ctx.save();
+      ctx.translate(spineX + 115, spineY + 100);
+      ctx.scale(entities.hubScaleX, entities.hubScaleY);
+      ctx.translate(-(spineX + 115), -(spineY + 100));
+      ctx.globalAlpha = entities.hubOpacity;
+      drawBox(spineX, spineY - 180, 530, 560, COLORS.violet, 'HISTORY HUB', 'CONDUCTOR HOST', 14);
+      ctx.fillStyle = 'rgba(157, 0, 255, 0.15)';
+      roundRect(ctx, spineX + 20, spineY - 130, 500, 108, 8);
+      ctx.fill();
+      ctx.fillStyle = COLORS.violet;
+      ctx.font = '700 11px "JetBrains Mono", monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText('SYSTEM PROMPT (CONTEXT)', spineX + 30, spineY - 110);
+      drawMultilineText(entities.systemPromptTools, spineX + 30, spineY - 88, 460, 16, COLORS.cyan, '600 11px "JetBrains Mono", monospace', 3);
+      entities.internalHistory.slice(-10).forEach((h, i) => {
+        const col = h.role === 'tool' ? COLORS.green : (h.role === 'assistant' ? COLORS.amber : COLORS.textDim);
+        ctx.fillStyle = col;
+        drawMultilineText(`• ${h.role.toUpperCase()}: ${h.text}`, spineX + 30, spineY - 2 + (i * 34), 470, 14, col, '600 10px "JetBrains Mono", monospace', 2);
+      });
+      ctx.restore();
+
+      drawBox(spineX + 370, spineY + 240, 130, 100, COLORS.amber, 'JSON BIN', 'BUFFER', 8);
+      entities.jsonBin.forEach((b, i) => {
+        ctx.fillStyle = COLORS.gold; 
+        ctx.font = '600 9px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(b, spineX + 435, spineY + 295 + (i*14));
+      });
+
+      drawBox(spineX - 270, spineY + 410, 810, 110, COLORS.cyan, '📡 MCP CLIENT', 'DISPATCHER', 12);
+
+      const serverData = [
+        { name: 'Emailer', transport: 'SSE/STDIO', color: COLORS.cyan, node: 'Email Service' },
+        { name: 'AWS S3', transport: 'STDIO/SSE', color: COLORS.cyan, node: 'S3 Bucket' },
+        { name: 'Gitlab', transport: 'STDIO', color: COLORS.cyan, node: 'Gitlab Pipeline' }
+      ];
+
+      [-240, 0, 240].forEach((off, i) => {
+        const data = serverData[i];
+        const y = limbY + off;
+        drawBox(limbX - 120, y - 45, 220, 90, data.color, `${data.name} - MCP Server`, data.transport, 8);
+        const appX = limbX + 180;
+        drawBox(appX, y - 45, 250, 90, COLORS.gold, data.node, 'EXTERNAL', 8);
+
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.4)';
+        ctx.beginPath();
+        ctx.moveTo(limbX + 100, y);
+        ctx.lineTo(appX, y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.strokeStyle = data.color + '4D';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(limbX - 121, y);
+        ctx.bezierCurveTo(
+          limbX - 200, y - 50,
+          spineX + 700, spineY + 200,
+          spineX + 540, spineY + 500
+        );
+        ctx.stroke();
+      });
+
+      ctx.restore();
+
+      if (entities.activeJSON) {
+        ctx.save();
+        const monW = 680, monH = 365, monX = width/2 - monW/2, monY = height - monH - 110;
+        ctx.fillStyle = 'rgba(25, 27, 35, 0.98)';
+        ctx.strokeStyle = '#51576b';
+        ctx.lineWidth = 2;
+        roundRect(ctx, monX, monY, monW, monH, 12);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,0.04)';
+        roundRect(ctx, monX, monY, monW, 34, 12);
+        ctx.fill();
+        ctx.fillStyle = '#b8bfd8';
+        ctx.font = '700 13px "JetBrains Mono", monospace';
+        ctx.fillText('>> TECH DIAGNOSTIC READOUT', monX + 18, monY + 22);
+        ctx.fillStyle = '#eef3ff'; 
+        ctx.font = '600 13px "JetBrains Mono", monospace';
+        const lines = entities.activeJSON.split('\n');
+        lines.slice(0, 17).forEach((l, i) => {
+          ctx.fillText(l, monX + 20, monY + 58 + (i * 18));
+        });
+        ctx.restore();
+      }
+
+      ctx.save();
+      ctx.translate(width/2 - camera.x * camera.scale, height/2 - camera.y * camera.scale);
+      ctx.scale(camera.scale, camera.scale);
+
+      entities.pulses.forEach((p, i) => {
+        p.progress += p.speed;
+        const curX = p.x + (p.tx - p.x) * p.progress;
+        const curY = p.y + (p.ty - p.y) * p.progress;
+        if (p.isBundle) {
+          const b = Math.sin(p.progress * Math.PI) * 15;
+          const size = 15 + b;
+          ctx.globalAlpha = 0.2;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(curX, curY, size + 10, 0, Math.PI*2);
+          ctx.fill();
+          ctx.globalAlpha = 0.5;
+          ctx.beginPath();
+          ctx.arc(curX, curY, size, 0, Math.PI*2);
+          ctx.stroke();
+          ctx.save();
+          ctx.translate(curX, curY);
+          ctx.rotate(frame * 0.1);
+          ctx.fillStyle = 'white';
+          for (let j = 0; j < 4; j++) {
+            ctx.fillRect(size/2, 0, 4, 4);
+            ctx.rotate(Math.PI/2);
+          }
+          ctx.restore();
+          ctx.globalAlpha = 1.0;
+        }
+        ctx.font = '700 10px "JetBrains Mono", monospace';
+        const tWidth = ctx.measureText(p.label).width;
+        ctx.fillStyle = 'rgba(0,0,0,0.86)';
+        roundRect(ctx, curX - tWidth/2 - 10, curY - 38, tWidth + 20, 24, 6);
+        ctx.fill();
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(curX, curY, p.isBundle ? 10 : 7, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.fillText(p.label, curX, curY - 22);
+        if (p.progress >= 1) {
+          spawnParticles(curX, curY, p.color);
+          if (p.onComplete) p.onComplete(p);
+          entities.pulses.splice(i, 1);
+        }
+      });
+
+      entities.particles.forEach((p, i) => {
+        if (p.target) {
+          p.x += (p.target.x - p.x) * 0.1;
+          p.y += (p.target.y - p.y) * 0.1;
+        } else {
+          p.x += p.vx;
+          p.y += p.vy;
+        }
+        p.life -= 0.015;
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, 4, 4);
+        if (p.life <= 0) entities.particles.splice(i, 1);
+      });
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+
+    init();
+  </script>
+</body>
+</html>
