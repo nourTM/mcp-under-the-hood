@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Evolution of AI Agents and MCP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* 1. CORE RESET & BASE STYLES */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background-color: #0f172a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 50px;
+            padding: 50px 0;
+            font-family: 'Lato', sans-serif;
+        }
+
+        /* 2. SLIDE CONTAINER */
+        .slide {
+            width: 1280px;
+            height: 720px;
+            background-color: #020617;
+            color: #f1f5f9;
+            padding: 80px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+            border: 1px solid #1e293b;
+        }
+
+        /* Ambient Background Glow */
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: -10%; right: -10%;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* 3. TYPOGRAPHY (EXTRA LARGE) */
+        h1 { font-family: 'Urbanist', sans-serif; font-size: 96px; font-weight: 700; line-height: 1.1; margin-bottom: 20px; }
+        h1 span { color: #10b981; }
+        
+        h2 { font-family: 'Urbanist', sans-serif; font-size: 56px; color: #10b981; margin-bottom: 40px; border-bottom: 3px solid #1e293b; padding-bottom: 20px; width: 100%; }
+        
+        h3 { font-family: 'Urbanist', sans-serif; font-size: 40px; margin-bottom: 20px; color: #f8fafc; }
+        
+        p, li, td, th { font-size: 30px; line-height: 1.5; color: #94a3b8; }
+        
+        .subtitle { font-size: 36px; color: #64748b; font-weight: 400; margin-top: 20px; }
+
+        /* 4. LAYOUT UTILITIES */
+        .center-content { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center; }
+        
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; height: 100%; align-items: center; }
+        
+        .content-area { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+
+        /* 5. UI COMPONENTS */
+        .tile { background: #0f172a; border: 1px solid #1e293b; border-radius: 30px; padding: 50px; height: 100%; }
+        .tile-q { border-left: 15px solid #10b981; }
+        .tile-a { border-left: 15px solid #3b82f6; }
+        
+        .badge { font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 15px; display: block; }
+        .badge-q { color: #10b981; }
+        .badge-a { color: #3b82f6; }
+
+        .icon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; width: 100%; }
+        .icon-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 30px; padding: 40px; text-align: center; }
+        .icon-card i { font-size: 80px; color: #10b981; margin-bottom: 30px; }
+
+        /* Chart Visualization */
+        .chart { width: 100%; padding: 20px 0; }
+        .bar-group { display: flex; align-items: center; margin-bottom: 40px; }
+        .bar-label { flex: 0 0 350px; font-weight: 700; font-size: 28px; padding-right: 40px; text-align: right; }
+        .bar-container { flex-grow: 1; background: #1e293b; height: 80px; border-radius: 40px; overflow: hidden; }
+        .bar-fill { height: 100%; display: flex; align-items: center; justify-content: flex-end; padding-right: 30px; color: white; font-weight: 700; font-size: 24px; border-radius: 40px; }
+
+        /* Highlight Stats */
+        .stat-large { font-size: 160px; font-weight: 700; color: #10b981; line-height: 1; font-family: 'Urbanist', sans-serif; }
+        .stat-label { font-size: 34px; color: #64748b; font-weight: 600; }
+
+        /* Comparison Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; padding: 25px; border-bottom: 4px solid #10b981; font-size: 34px; color: #f8fafc; }
+        td { padding: 25px; border-bottom: 1px solid #1e293b; font-size: 28px; }
+
+        /* Animations */
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+        .data-dot { width: 12px; height: 12px; background: #10b981; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
+
+    </style>
+</head>
+<body>
+
+<!-- Slide 1: Introduction -->
+<div class="slide">
+    <div class="center-content">
+        <h1>Standardizing<br><span>Agentic</span> AI</h1>
+        <p class="subtitle">The Evolution from Hardcoded Silos to MCP Protocol</p>
+        <div style="margin-top: 60px; font-weight: 700; color: #334155; letter-spacing: 5px; font-size: 22px;">MODERN PARADIGMS • MARCH 2026</div>
+    </div>
+</div>
+
+<!-- Slide 2: Q&A - High Res Data -->
+<div class="slide">
+    <h2>Handling Big Data</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div class="tile tile-q">
+                <span class="badge badge-q">The Question</span>
+                <h3>How did we deal with LiDAR or High-Res imagery before MCP?</h3>
+                <p>Handling gigabyte-scale files was a bottleneck. We used RAG to "slice" data into text chunks, losing spatial context and resolution.</p>
+            </div>
+            <div class="tile tile-a">
+                <span class="badge badge-a">The Evolution</span>
+                <h3>Resource URIs & Lazy Loading</h3>
+                <p>Tools now send a pointer (URI) like <code>mcp://lidar/scan</code>. Data is only "hydrated" when the LLM specifically asks to read a sector.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 3: Architecture Icons -->
+<div class="slide">
+    <h2>Modern Data Architecture</h2>
+    <div class="content-area">
+        <div class="icon-grid">
+            <div class="icon-card">
+                <i class="fa-solid fa-link"></i>
+                <h3>Resource URIs</h3>
+                <p>Pointers that maintain holistic context without clogging memory.</p>
+            </div>
+            <div class="icon-card">
+                <i class="fa-solid fa-bolt"></i>
+                <h3>Lazy Loading</h3>
+                <p>On-demand retrieval ensuring pixel-perfect resolution when needed.</p>
+            </div>
+            <div class="icon-card">
+                <i class="fa-solid fa-filter"></i>
+                <h3>Context Pruning</h3>
+                <p>Dynamic prompt filling only with tools relevant to the current task.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 4: Efficiency Chart -->
+<div class="slide">
+    <h2>Efficiency & Cost Economics</h2>
+    <div class="content-area">
+        <div class="chart">
+            <div class="bar-group">
+                <div class="bar-label">Sequential Loops</div>
+                <div class="bar-container"><div class="bar-fill" style="width: 100%; background: #ef4444;">100% TOKEN COST</div></div>
+            </div>
+            <div class="bar-group">
+                <div class="bar-label">Parallel Calling</div>
+                <div class="bar-container"><div class="bar-fill" style="width: 35%; background: #10b981;">35% TOKEN COST</div></div>
+            </div>
+        </div>
+        <div style="margin-top: 40px; padding: 40px; background: #0f172a; border-radius: 20px; border: 1px solid #1e293b;">
+            <p><strong>Q: Why the drastic drop?</strong><br>A: Parallel calling emits multiple tool requests in one go, avoiding the redundant processing of conversation history for every single turn.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 5: The Loop Evolution -->
+<div class="slide">
+    <h2>Evolution of the "Dreaded Loop"</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div class="tile tile-q">
+                <span class="badge badge-q">Legacy Failure</span>
+                <h3>Syntax & Text Errors</h3>
+                <p>Loops were caused by bad RegEx or missing brackets. The AI would apologize and retry the same broken text command.</p>
+            </div>
+            <div class="tile tile-a">
+                <span class="badge badge-a">Modern Failure</span>
+                <h3>Logic Recursion</h3>
+                <p>Loops are now structural. Agents cycle between tools A and B because of circular logic dependencies in the reasoning chain.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 6: Circuit Breakers -->
+<div class="slide">
+    <h2>Combatting Logic Loops</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div style="text-align: center;">
+                <div class="stat-large">$0.50</div>
+                <div class="stat-label">Hard Budget Cap</div>
+                <div style="margin-top: 60px;" class="stat-large">30s</div>
+                <div class="stat-label">Execution Timeout</div>
+            </div>
+            <div style="padding-left: 40px;">
+                <h3>Q: How do we stop them?</h3>
+                <p><strong>A: Structural Circuit Breakers.</strong> We no longer count turn limits; we enforce financial and temporal guardrails.</p>
+                <p style="margin-top: 30px;"><strong>Monitor Models:</strong> A secondary, cheaper LLM watches the agent's "trace" to interject if circular patterns emerge.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 7: Security Hijacking -->
+<div class="slide">
+    <h2>Defending Against Hijacking</h2>
+    <div class="content-area">
+        <div class="icon-grid">
+            <div class="icon-card">
+                <i class="fa-solid fa-user-shield"></i>
+                <h3>HITL</h3>
+                <p>Human-in-the-Loop intercepts sensitive calls before they execute.</p>
+            </div>
+            <div class="icon-card">
+                <i class="fa-solid fa-code"></i>
+                <h3>Metadata</h3>
+                <p>Native signals replace text, preventing prompt injection hijacking.</p>
+            </div>
+            <div class="icon-card">
+                <i class="fa-solid fa-lock"></i>
+                <h3>TLS 1.3</h3>
+                <p>Standardized encrypted JSON-RPC for all tool communication.</p>
+            </div>
+        </div>
+        <p style="text-align: center; margin-top: 60px;"><strong>Q: Can a server hijack my agent?</strong><br>A: Protocol metadata and mandatory review steps create a robust physical firewall.</p>
+    </div>
+</div>
+
+<!-- Slide 8: Comparison Matrix -->
+<div class="slide">
+    <h2>At a Glance: The MCP Shift</h2>
+    <div class="content-area">
+        <table>
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Legacy (Function Calls)</th>
+                    <th>Modern (MCP Standard)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Architecture</strong></td>
+                    <td>Hardcoded / App-Specific</td>
+                    <td>Universal Handshake</td>
+                </tr>
+                <tr>
+                    <td><strong>Execution</strong></td>
+                    <td>Sequential / High-Latency</td>
+                    <td>Parallel / Low-Latency</td>
+                </tr>
+                <tr>
+                    <td><strong>Data Handling</strong></td>
+                    <td>RAG Slicing (Lossy)</td>
+                    <td>Resource URIs (Lossless)</td>
+                </tr>
+                <tr>
+                    <td><strong>Guardrails</strong></td>
+                    <td>RegEx / Text Strings</td>
+                    <td>Circuit Breakers / Metadata</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Slide 9: Conclusion -->
+<div class="slide">
+    <div class="center-content">
+        <i class="fa-solid fa-comments" style="font-size: 100px; color: #10b981; margin-bottom: 40px;"></i>
+        <h2 style="font-size: 80px; border: none; text-align: center;">Any <span>Questions?</span></h2>
+        <p class="subtitle">Standardizing the future of AI Agent communication.</p>
+        <div style="margin-top: 80px; font-family: monospace; color: #10b981; font-size: 24px;">
+            SYSTEM_STATUS: SECURE // REASONING: STABLE
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
